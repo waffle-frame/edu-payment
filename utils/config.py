@@ -26,16 +26,8 @@ class Bill:
 
 @dataclass
 class Spreadsheets:
-    type_: str 
-    project_id: str
-    private_key_id: str
-    private_key: str
-    client_email: str
-    client_id: int
-    auth_uri: str
-    token_uri: str
-    auth_provider_x509_cert_url: str
-    client_x509_cert_url: str
+    folder_id: str
+    account_file: str
 
 @dataclass
 class Logger:
@@ -73,16 +65,8 @@ def load_config():
             redirect_url = environ.get("BILL_REDIRECT_URL"),
         ),
         spreadsheets = Spreadsheets(
-            type_ = environ.get("SPREADSHEETS_TYPE"),
-            project_id = environ.get("SPREADSHEETS_PROJECT_ID"),
-            private_key_id = environ.get("SPREADSHEETS_PRIVATE_KEY_ID"),
-            private_key = environ.get("SPREADSHEETS_PRIVATE_KEY"),
-            client_email = environ.get("SPREADSHEETS_CLIENT_EMAIL"),
-            client_id = environ.get("SPREADSHEETS_CLIENT_ID"),
-            auth_uri = environ.get("SPREADSHEETS_AUTH_URI"),
-            token_uri = environ.get("SPREADSHEETS_TOKEN_URI"),
-            auth_provider_x509_cert_url = environ.get("SPREADSHEETS_AUTH_PROVIDER_X509_CERT_URL"),
-            client_x509_cert_url = environ.get("SPREADSHEETS_CLIENT_X509_CERT_URL"),
+            folder_id = environ.get("SPREADSHEETS_FOLDER_ID"),
+            account_file = environ.get("SPREADSHEETS_ACCOUNT_FILE"),
         ),
         logger = Logger(
             path = environ.get("LOGGER_PATH"),

@@ -5,3 +5,5 @@ env/
 .env
 .vscode
 **__pycache__**
+
+spreadsheets_auth.json

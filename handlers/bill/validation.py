@@ -1,13 +1,15 @@
 from aiogram.types import Message
 from aiogram.dispatcher import FSMContext
+from gspread_asyncio import AsyncioGspreadClient
 
 from states.issue_invoice import IssueInvoice
 from keyboards.keyboard import validation_list
 from utils.bill.generate_bill import generate_bill
 from handlers.bill.start_issue_invoice_operation import start_issue_invoice_operation
 
+
 #
-async def validation(message: Message, state: FSMContext):
+async def validation(message: Message, state: FSMContext, spread_client: AsyncioGspreadClient):
     if message.text not in validation_list:
         return await message.answer("Вариант не существует")
 
@@ -17,7 +19,7 @@ async def validation(message: Message, state: FSMContext):
 
     sdata = await state.get_data()
 
-    response = await generate_bill(sdata.get("description", ""), sdata.get("cost", 1))
+    response = await generate_bill(sdata.get("description", "error"), sdata.get("cost", 1))
     await message.answer(response)
 
     # payment_str = 'Номер заказа: ' + payment_info[0] + '\nСсылка на оплату:\n' + payment_info[1]['formUrl']
