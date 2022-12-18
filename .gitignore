@@ -7,3 +7,4 @@ env/
 **__pycache__**
 
 spreadsheets_auth.json
+sheets.googleapis.com-python.json
