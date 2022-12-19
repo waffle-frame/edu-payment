@@ -7,6 +7,11 @@ from keyboards.keyboard import reset_kb
 
 # 
 async def description(message: Message, state: FSMContext):
+    if len(message.text) > 512:
+        return message.answer(
+            f"Текст описания не должно превышать 512 символов\nСодержание вашего сообщения:{len(message.text)}"
+        )
+
     async with state.proxy() as data:
         data["description"] = message.text
 

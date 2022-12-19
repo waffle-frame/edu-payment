@@ -20,7 +20,7 @@ async def start(dp: Dispatcher):
     conf = load_config()
 
     await update_commands(dp)
-    spread_client = await setup_spread_client(conf.spreadsheets)
+    spread_client = setup_spread_client(conf.spreadsheets)
     engine, database = setup_database(conf.database)
 
     setup_middlewares(dp, database, spread_client)

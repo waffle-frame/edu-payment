@@ -15,7 +15,6 @@ from keyboards.keyboard import operations_list
 def register_payment_commands(dp: Dispatcher):
     dp.register_message_handler(start_issue_invoice_operation, Text(equals=[operations_list[0]]))
 
-    dp.register_message_handler(start_issue_invoice_operation)
     dp.register_message_handler(lesson_type, state=IssueInvoice.lesson_type)
     dp.register_message_handler(parents_data, state=IssueInvoice.parents_data)
     dp.register_message_handler(description, state=IssueInvoice.description)

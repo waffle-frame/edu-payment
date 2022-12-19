@@ -14,4 +14,4 @@ async def start_issue_invoice_operation(message: Message):
         return await message.answer("Выберите операцию:", reply_markup=operations_kb())
 
     await message.answer("Выберите тип занятия:", reply_markup=issue_invoice_kb())
-    await IssueInvoice.validation.set()
+    await IssueInvoice.lesson_type.set()
