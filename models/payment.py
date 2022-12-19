@@ -2,7 +2,7 @@ from typing import Any
 from loguru import logger
 from datetime import datetime
 
-from sqlalchemy import insert
+from sqlalchemy import insert, update
 from sqlalchemy.orm import scoped_session
 from sqlalchemy_utils.types import ChoiceType
 from sqlalchemy import Column, String, DateTime, VARCHAR, BigInteger
@@ -28,8 +28,8 @@ class Payment(Base):
 
     paid_at = Column(DateTime(timezone=True))
     is_paid = Column(ChoiceType(PAYMENT_STATE, impl=String()), default="В ожидании")
-    order_id = Column(VARCHAR(50), nullable = False)
-    order_link = Column(String, nullable = False)
+    order_id = Column(VARCHAR(50))
+    order_link = Column(String)
     creator_data = Column(VARCHAR(100), nullable = False)   # Format: user_id|username
 
     lesson_type = Column(VARCHAR(20), nullable = False)
@@ -44,6 +44,20 @@ class Payment(Base):
             result = await session.execute(query)            
             await session.commit()                          # type: ignore
             return result.fetchone()[0]
+        except Exception as e:
+            logger.error("ROLLBACK EXCEPTION:", e, kwargs)
+            return
+
+    @classmethod
+    async def update(cls, session: scoped_session, id: int, **kwargs: Any):
+        try:
+            query = update(cls
+                ).where(cls.id==id
+                ).values(**kwargs
+            ).execution_options(synchronize_session="fetch")
+                
+            await session.execute(query)            
+            await session.commit()                          # type: ignore
         except Exception as e:
             logger.error("ROLLBACK EXCEPTION:", e, kwargs)
             return
