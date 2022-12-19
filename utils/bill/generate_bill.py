@@ -1,12 +1,12 @@
 import json
 
 from os import environ
+from typing import Tuple
 from loguru import logger 
-from random import randint
 from aiohttp import ClientSession
 
 
-async def generate_bill(description: str, pennies: int) -> str:
+async def generate_bill(description: str, pennies: int, order_number: int) -> Tuple[str, str]:
                     #  parent_name, who_issued_the_payment, payments_purposes_table_id, payments_tables):
     """
         generate_bill ...
@@ -22,7 +22,7 @@ async def generate_bill(description: str, pennies: int) -> str:
 
         # For building bill
         "description": description,
-        "orderNumber": randint(1, 256*10),
+        "orderNumber": order_number,
         "amount": pennies,
         "returnUrl": environ.get("BILL_REDIRECT_URL"),
     }
@@ -37,4 +37,4 @@ async def generate_bill(description: str, pennies: int) -> str:
 
                 if "formUrl" in data:
                     await session.close()
-                    return data["formUrl"]
+                    return data['orderId'], data["formUrl"]
