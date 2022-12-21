@@ -1,17 +1,26 @@
-from loguru import logger
+from os import environ
 from pygsheets.client import Client
+from pygsheets.worksheet import Worksheet
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from models.pushes import Push
 
 
-def create_row(client: Client, file_id: str | None):
+async def create_rows(db_client: AsyncSession, spread_client: Client, file: str, offset: int):
     """
-        create_row
+        create_row ...
     """
 
-    if file_id is None:
-        logger.error("value of field_id is none")
-        return
+    file_id = environ.get(f"SPREADSHEETS_{file.upper()}")
+    spreads = spread_client.open_by_key(file_id)
+    spread: Worksheet = spreads[0]
 
-    spread = client.open_by_key(file_id)
-    print('SPREADSHEETS_' + sdata["lesson_type"].split("_")[1].upper())
-    file_id = environ.get('SPREADSHEETS_' + sdata["lesson_type"].split("_")[1].upper())
-    payment_str = 'Номер заказа: ' + payment_info[0] + '\nСсылка на оплату:\n' + payment_info[1]['formUrl']
+    cells = spread.get_all_values(include_tailing_empty_rows=False, include_tailing_empty=False)
+
+    non_empty_rows = []
+    for i in cells:
+        if i != []:
+            non_empty_rows.append(i)
+
+    data = await Push.get_data_for_upload(db_client, offset)
+    spread.insert_rows(len(non_empty_rows), values=data, inherit=False)

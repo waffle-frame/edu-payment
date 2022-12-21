@@ -27,7 +27,7 @@ class Payment(Base):
     created_at = Column(DateTime(timezone=True), default = datetime.utcnow)
 
     paid_at = Column(DateTime(timezone=True))
-    is_paid = Column(ChoiceType(PAYMENT_STATE, impl=String()), default="В ожидании")
+    status = Column(ChoiceType(PAYMENT_STATE, impl=String()), default="В ожидании")
     order_id = Column(VARCHAR(50))
     order_link = Column(String)
     creator_data = Column(VARCHAR(100), nullable = False)   # Format: user_id|username

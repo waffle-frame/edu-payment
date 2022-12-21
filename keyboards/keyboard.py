@@ -4,10 +4,12 @@ from utils.bot.list_to_buttons import list_to_buttons
 
 operations_list = ["Выставить счет", "Проверить платёж"]
 issue_invoice_dict = {
-    "Групповые👥": "tg2_group", "Индивидуальные👤": "tg2_individual",
-    "Интенсив👨‍🏫": "tg2_intensive", "Короткий проект📄": "tg2_short",
-    "Спецкурс": "tg2_special", 
+    "Групповые👥": "group", "Индивидуальные👤": "individual",
+    "Интенсив👨‍🏫": "intensive", "Короткий проект📄": "short",
+    "Спецкурс": "special", 
 }
+
+issue_invoice_prefix = 'tg2_'
 validation_list = ['✅', '❌']
 
 

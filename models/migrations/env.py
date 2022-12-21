@@ -7,6 +7,7 @@ from alembic import context
 
 # Project modules
 from models import Base
+from models.pushes import Push
 from models.payment import Payment
 
 # this is the Alembic Config object, which provides
