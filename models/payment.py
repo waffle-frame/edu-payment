@@ -70,8 +70,16 @@ class Payment(Base):
             :params `date_range` indicated in minutes
         """
 
-        date_now = datetime.now().date()
+        if date_range == 60:
+            date_now = datetime.now().date() + timedelta(days=-14)
+        elif date_range > 60:
+            date_now = datetime.now().date() + timedelta(days=-60)
+        else:
+            date_now = datetime.now().date()
+
+
         date_range_ = date_now + timedelta(days=-date_range)
+        print(date_range_, date_now)
 
         query = "SELECT id::varchar, order_id, lesson_type " + \
                 "FROM payments " + \

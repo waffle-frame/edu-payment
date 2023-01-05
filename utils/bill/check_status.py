@@ -12,7 +12,7 @@ error_code_to_string = {
     6: "Не актуально",
 }
 
-async def check_bill(order_data: List[Tuple[str, str]]) -> List[Tuple[str, str]]:
+async def check_bill(order_data: List[Tuple[str, str]]) -> List[Tuple[str, str, str, str]]:
     """
         check_bill ...
     """

@@ -1,6 +1,7 @@
 # Packages
 from loguru import logger
 from aiogram import Dispatcher, executor
+from sqlalchemy.orm import scoped_session
 
 # Configs
 import handlers
@@ -21,7 +22,7 @@ async def start(dp: Dispatcher):
     conf = load_config()
 
     spread_client = setup_spread_client(conf.spreadsheets, conf.bill)
-    engine, database = setup_database(conf.database)
+    engine, database  = setup_database(conf.database)
     setup_middlewares(dp, database, spread_client)
     await setup_scheduler(database, spread_client)
 

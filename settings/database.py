@@ -1,4 +1,5 @@
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import scoped_session
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
 from utils.config import Database
@@ -17,6 +18,6 @@ def setup_database(conf: Database):
         echo = False,
     )
 
-    return engine, sessionmaker(
+    return engine, scoped_session(sessionmaker(
         bind = engine, expire_on_commit = False, class_ = AsyncSession
-    )
+    ))
