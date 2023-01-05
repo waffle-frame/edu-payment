@@ -21,8 +21,9 @@ class Bill:
     username: str
     password: str
     expiration_date: str
-    url: str
     redirect_url: str
+    register_order_url: str
+    check_order_url: str
 
 @dataclass
 class Spreadsheets:
@@ -61,7 +62,8 @@ def load_config():
             username = environ.get("BILL_USERNAME"),
             password = environ.get("BILL_PASSWORD"),
             expiration_date = environ.get("BILL_EXPIRATION_DATE"),
-            url = environ.get("BILL_URL"),
+            register_order_url = environ.get("BILL_REGISTER_ORDER_URL"),
+            check_order_url = environ.get("BILL_CHECK_ORDER_URL"),
             redirect_url = environ.get("BILL_REDIRECT_URL"),
         ),
         spreadsheets = Spreadsheets(

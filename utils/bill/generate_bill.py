@@ -1,30 +1,29 @@
 import json
 
-from os import environ
 from typing import Tuple
 from loguru import logger 
 from aiohttp import ClientSession
 
+from settings.spreadsheets import bill_env
 
 async def generate_bill(description: str, pennies: int, order_number: int) -> Tuple[str, str]:
-                    #  parent_name, who_issued_the_payment, payments_purposes_table_id, payments_tables):
     """
         generate_bill ...
     """
 
-    # Filling in the request parameters to correctly obtain a link to the payment page.
-    url = environ.get("BILL_URL", "")
+    # Filling in the request parameters to correctly obtain a link to the payment page
+    url = bill_env.get("registerOrderUrl", "")
     params = {
         # Credentials
-        "userName": environ.get("BILL_USERNAME"),
-        "password": environ.get("BILL_PASSWORD"),
-        "expirationDate": environ.get("BILL_EXPIRATION_DATE"),
+        "userName": bill_env.get("userName"),
+        "password": bill_env.get("password"),
+        "expirationDate": bill_env.get("expirationDate"),
 
         # For building bill
         "description": description,
         "orderNumber": order_number,
         "amount": pennies,
-        "returnUrl": environ.get("BILL_REDIRECT_URL"),
+        "returnUrl": bill_env.get("returnUrl"),
     }
 
     # 
@@ -35,6 +34,9 @@ async def generate_bill(description: str, pennies: int, order_number: int) -> Tu
                 data = json.loads(response)
                 logger.info(data)
 
+                if 'errorMessage' in data:
+                    if data['errorMessage'] == 'Заказ с таким номером уже обработан':
+                        params['orderNumber'] = params['orderNumber'] + 1000
                 if "formUrl" in data:
                     await session.close()
                     return data['orderId'], data["formUrl"]

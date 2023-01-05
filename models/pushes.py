@@ -47,7 +47,7 @@ class Push(Base):
         query = f"""SELECT ('{issue_invoice_prefix}' || lesson_type || id), ('=INT(' || amount || '/100)&","&MOD(' || amount || ',100)&" ₽"'), status, """ + \
                     """('=HYPERLINK("' || order_link || '","' || order_id ||  '")'),""" + \
                     "description, parents_name, '@' || split_part(creator_data, '|', 2)," + \
-                    "COALESCE(to_char(created_at, 'MM-DD-YYYY HH24:MI:SS'), '')\n" + \
+                    "COALESCE(to_char(created_at, 'mm-dd-yyyy HH24:MI:SS'), '')\n" + \
                 f"FROM payments OFFSET {offset};"
 
         data_exec = await session.execute(query)

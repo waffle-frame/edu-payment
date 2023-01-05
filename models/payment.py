@@ -1,9 +1,10 @@
-from typing import Any
 from loguru import logger
 from datetime import datetime
-
+from datetime import timedelta
+from typing import Any, List, Tuple
 from sqlalchemy import insert, update
 from sqlalchemy.orm import scoped_session
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy_utils.types import ChoiceType
 from sqlalchemy import Column, String, DateTime, VARCHAR, BigInteger
 
@@ -61,3 +62,28 @@ class Payment(Base):
         except Exception as e:
             logger.error("ROLLBACK EXCEPTION:", e, kwargs)
             return
+
+    @classmethod
+    async def check_status(cls, session: scoped_session, date_range:int) -> List[Tuple[str, str]]:
+        """
+            check_status
+            :params `date_range` indicated in minutes
+        """
+
+        date_now = datetime.now().date()
+        date_range_ = date_now + timedelta(days=-date_range)
+
+        query = "SELECT id::varchar, order_id, lesson_type " + \
+                "FROM payments " + \
+                "WHERE status = 'В ожидании' " + \
+                f"AND created_at BETWEEN '{date_range_.__str__() + (' 00:00:00')}'::timestamp and '{date_now.__str__() + (' 23:59:59')}'::timestamp " + \
+                "ORDER BY lesson_type;"
+    
+        try:
+            query_exec = await session.execute(query)
+            result = query_exec.fetchall()
+            return [ tuple(i) for i in result]
+        except SQLAlchemyError as e:
+            logger.error("ROLLBACK:", e)
+            await session.rollback()                        # type: ignore
+            return                                          # type: ignore

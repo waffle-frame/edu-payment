@@ -12,6 +12,7 @@ from middlewares import setup_middlewares
 from settings.bot import dp
 from settings.logger import setup_logger
 from settings.database import setup_database
+from settings.scheduler import setup_scheduler
 from settings.spreadsheets import setup_spread_client
 
 
@@ -19,11 +20,14 @@ from settings.spreadsheets import setup_spread_client
 async def start(dp: Dispatcher):
     conf = load_config()
 
-    await update_commands(dp)
-    spread_client = setup_spread_client(conf.spreadsheets)
+    spread_client = setup_spread_client(conf.spreadsheets, conf.bill)
     engine, database = setup_database(conf.database)
-
     setup_middlewares(dp, database, spread_client)
+    await setup_scheduler(database, spread_client)
+
+    # return
+
+    await update_commands(dp)
     setup_logger(conf.logger.path)
     handlers.setup_handlers(dp)
 
@@ -38,7 +42,7 @@ async def start(dp: Dispatcher):
 async def stop(dp: Dispatcher):
     await dp.storage.close()
     await dp.storage.wait_closed()
-    await dp['db_engine'].dispose()
+    # await dp['db_engine'].dispose()
     logger.info("All connections were successfully disconnected!")
 
 

@@ -43,7 +43,8 @@ async def validation(message: Message, state: FSMContext, db: AsyncSession, spre
     )
     await state.finish()
 
-    offset = await check_count_rows(db, issue_invoice_dict[sdata.get("lesson_type")])
+    # offset = await check_count_rows(db, issue_invoice_dict[sdata.get("lesson_type")])
+    offset = await check_count_rows(db)
     if offset is None:
         return
 

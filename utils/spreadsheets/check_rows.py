@@ -17,6 +17,10 @@ async def check_count_rows(session: scoped_session, lesson_type: str="test") -> 
     push_exec = await session.execute(push_query)
     push_result = push_exec.fetchone()
 
+    if push_result is None:
+        logger.error("start data not found!")
+        return
+
     if count_result[0] >= push_result[0].offset * push_result[0].limit:
         push_result = push_result[0]
         logger.info(f"PUSHING! ", lesson_type, push_result.offset+1)
