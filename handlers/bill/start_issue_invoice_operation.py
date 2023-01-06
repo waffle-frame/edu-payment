@@ -1,7 +1,8 @@
 from aiogram.types import Message
 
 from states.issue_invoice import IssueInvoice
-from keyboards.keyboard import operations_kb, issue_invoice_kb, operations_list, validation_list
+from keyboards.keyboard import operations_kb, issue_invoice_kb
+from keyboards.buttons import operations_list, validation_list
 
 
 # Start the billing process. List of available type lessons

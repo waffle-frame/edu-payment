@@ -7,7 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import Column, VARCHAR, BigInteger
 
 from models import Base
-from keyboards.keyboard import issue_invoice_prefix
+from keyboards.buttons import issue_invoice_prefix
 
 
 class Push(Base):

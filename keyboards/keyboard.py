@@ -1,21 +1,19 @@
 from aiogram.types import ReplyKeyboardMarkup, ReplyKeyboardRemove
 
 from utils.bot.list_to_buttons import list_to_buttons
-
-operations_list = ["Выставить счет", "Проверить платёж"]
-issue_invoice_dict = {
-    "Групповые👥": "group", "Индивидуальные👤": "individual",
-    "Интенсив👨‍🏫": "intensive", "Короткий проект📄": "short",
-    "Спецкурс": "special", 
-}
-
-issue_invoice_prefix = 'tg2_'
-validation_list = ['✅', '❌']
+from keyboards.buttons import operations_list, issue_invoice_dict, \
+    validation_list, parent_history_operations_list
 
 
 def operations_kb() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=list_to_buttons(operations_list),
+        resize_keyboard=True, one_time_keyboard=True
+    )
+
+def parents_history_operations_kb() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=list_to_buttons(parent_history_operations_list),
         resize_keyboard=True, one_time_keyboard=True
     )
 

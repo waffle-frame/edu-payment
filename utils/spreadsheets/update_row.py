@@ -6,7 +6,7 @@ from pygsheets.custom_types import HorizontalAlignment
 from pygsheets.worksheet import Worksheet, Cell, Address
 
 from utils.spreadsheets.colors import colors
-from keyboards.keyboard import issue_invoice_prefix
+from keyboards.buttons import issue_invoice_prefix
 
 
 def update_states(spread_client: Client, data: List[Tuple[str, str, str, str]]):

@@ -2,8 +2,8 @@ from aiogram.types import Message
 from aiogram.dispatcher import FSMContext
 
 from states.issue_invoice import IssueInvoice
-from keyboards.keyboard import issue_invoice_kb, issue_invoice_dict, reset_kb
-
+from keyboards.buttons import issue_invoice_dict
+from keyboards.keyboard import issue_invoice_kb, reset_kb
 
 # 
 async def lesson_type(message: Message, state: FSMContext):

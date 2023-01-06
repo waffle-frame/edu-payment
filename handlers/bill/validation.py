@@ -10,8 +10,8 @@ from utils.bill.generate_bill import generate_bill
 from utils.spreadsheets.create_row import create_rows
 from utils.spreadsheets.check_rows import check_count_rows
 from handlers.bill.start_issue_invoice_operation import start_issue_invoice_operation
-from keyboards.keyboard import validation_list, issue_invoice_dict, issue_invoice_prefix
-
+from keyboards.buttons import validation_list, issue_invoice_prefix
+from keyboards.keyboard import issue_invoice_dict
 
 #
 async def validation(message: Message, state: FSMContext, db: AsyncSession, spread_client: Client):
@@ -27,7 +27,7 @@ async def validation(message: Message, state: FSMContext, db: AsyncSession, spre
 
     order_number: int | None = await Payment.create(db,
         creator_data=f"{user.id}|{user.username}",
-        lesson_type=issue_invoice_dict[sdata.get("lesson_type")], parents_name=sdata.get("parents_data"),
+        lesson_type=issue_invoice_dict[sdata.get("lesson_type")], parents_name=sdata.get("parents_data").title(),
         description=sdata.get("description"), amount=int(sdata.get("cost")),
     )
     if order_number is None:

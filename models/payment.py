@@ -2,14 +2,15 @@ from loguru import logger
 from datetime import datetime
 from datetime import timedelta
 from typing import Any, List, Tuple
-from sqlalchemy import insert, update
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy_utils.types import ChoiceType
+from sqlalchemy import insert, update, select, desc
 from sqlalchemy import Column, String, DateTime, VARCHAR, BigInteger
 
 
 from models import Base
+from keyboards.buttons import issue_invoice_prefix
 
 
 class Payment(Base):
@@ -39,28 +40,86 @@ class Payment(Base):
     amount = Column(BigInteger, nullable = False)
 
     @classmethod
-    async def create(cls, session: scoped_session, **kwargs: Any):
+    async def check_parents_name(cls, session: scoped_session, parents_name: str, **kwargs: Any) -> bool:
+        query = select(cls.id).where(cls.parents_name==parents_name).limit(1)
+
         try:
-            query = insert(cls).values(**kwargs).returning(cls.id)
+            query_exec = await session.execute(query)
+            result = query_exec.fetchone()
+            if result is None:
+                return False
+            return True
+
+        except SQLAlchemyError as e:
+            logger.error(f"ROLLBACK EXCEPTION: {e, parents_name, kwargs}")
+            return False
+
+    @classmethod
+    async def check_invoice(cls, session: scoped_session, order_id: int, lesson_type: str) -> Tuple[str, datetime, str] | None:
+        query = select(
+            cls.status, cls.created_at, cls.creator_data
+        ).where(
+            cls.id==order_id, cls.lesson_type==lesson_type
+        )
+
+        try:
+            query_exec = await session.execute(query)
+            result = query_exec.fetchone()
+            if result is None:
+                return None
+            return result
+
+        except SQLAlchemyError as e:
+            logger.error(f"ROLLBACK EXCEPTION: {e, order_id}")
+            return
+
+    @classmethod
+    async def paid_invoice(cls, session: scoped_session, parents_name: str):
+        query = select(
+            cls.id, cls.lesson_type, cls.amount, cls.created_at
+        ).where(
+            cls.status=='Оплачено', cls.parents_name==parents_name
+        ).order_by(desc(cls.created_at))
+
+        try:
+            query_exec = await session.execute(query)
+            result = query_exec.fetchall()
+            if result is None:
+                return None
+            data = []
+
+            for i in result:
+                data.append([issue_invoice_prefix + i[1] + str(i[0]), i[2], i[3]])
+            return data
+
+        except SQLAlchemyError as e:
+            logger.error(f"ROLLBACK EXCEPTION: {e}")
+            return
+
+    @classmethod
+    async def create(cls, session: scoped_session, **kwargs: Any):
+        query = insert(cls).values(**kwargs).returning(cls.id)
+
+        try:
             result = await session.execute(query)            
             await session.commit()                          # type: ignore
             return result.fetchone()[0]
-        except Exception as e:
-            logger.error("ROLLBACK EXCEPTION:", e, kwargs)
+        except SQLAlchemyError as e:
+            logger.error(f"ROLLBACK EXCEPTION: {e, kwargs}")
             return
 
     @classmethod
     async def update(cls, session: scoped_session, id: int, **kwargs: Any):
+        query = update(cls
+            ).where(cls.id==id
+            ).values(**kwargs
+        ).execution_options(synchronize_session="fetch")
+
         try:
-            query = update(cls
-                ).where(cls.id==id
-                ).values(**kwargs
-            ).execution_options(synchronize_session="fetch")
-                
             await session.execute(query)            
             await session.commit()                          # type: ignore
-        except Exception as e:
-            logger.error("ROLLBACK EXCEPTION:", e, kwargs)
+        except SQLAlchemyError as e:
+            logger.error(f"ROLLBACK EXCEPTION: {e, kwargs}")
             return
 
     @classmethod
@@ -92,6 +151,6 @@ class Payment(Base):
             result = query_exec.fetchall()
             return [ tuple(i) for i in result]
         except SQLAlchemyError as e:
-            logger.error("ROLLBACK:", e)
+            logger.error(f"ROLLBACK: {e, date_range}")
             await session.rollback()                        # type: ignore
             return                                          # type: ignore
