@@ -44,7 +44,7 @@ async def parents_name_or_invoice_data(message: Message, state: FSMContext, db: 
         return message.answer("Родитель не найден")
 
     async with state.proxy() as data:
-        data["parents_name"] = message.text
+        data["parents_name"] = message.text.title()
 
 
     await CheckBill.parents_history_operations.set()

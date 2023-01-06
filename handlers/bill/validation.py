@@ -11,7 +11,7 @@ from utils.spreadsheets.create_row import create_rows
 from utils.spreadsheets.check_rows import check_count_rows
 from handlers.bill.start_issue_invoice_operation import start_issue_invoice_operation
 from keyboards.buttons import validation_list, issue_invoice_prefix
-from keyboards.keyboard import issue_invoice_dict
+from keyboards.buttons import issue_invoice_dict
 
 #
 async def validation(message: Message, state: FSMContext, db: AsyncSession, spread_client: Client):
@@ -43,10 +43,10 @@ async def validation(message: Message, state: FSMContext, db: AsyncSession, spre
     )
     await state.finish()
 
-    # offset = await check_count_rows(db, issue_invoice_dict[sdata.get("lesson_type")])
-    offset = await check_count_rows(db)
+    # offset = await check_count_rows(db)
+    offset = await check_count_rows(db, issue_invoice_dict[sdata.get("lesson_type")])
     if offset is None:
         return
 
-    # await create_rows(db, spread_client, issue_invoice_dict[sdata.get("lesson_type")], 0)
-    await create_rows(db, spread_client, "test", offset)
+    await create_rows(db, spread_client, issue_invoice_dict[sdata.get("lesson_type")], 0)
+    # await create_rows(db, spread_client, "test", offset)

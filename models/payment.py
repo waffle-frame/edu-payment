@@ -1,11 +1,10 @@
 from loguru import logger
-from datetime import datetime
-from datetime import timedelta
 from typing import Any, List, Tuple
+from datetime import datetime, timedelta
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy_utils.types import ChoiceType
-from sqlalchemy import insert, update, select, desc
+from sqlalchemy import insert, update, select, desc, between
 from sqlalchemy import Column, String, DateTime, VARCHAR, BigInteger
 
 
@@ -90,6 +89,32 @@ class Payment(Base):
 
             for i in result:
                 data.append([issue_invoice_prefix + i[1] + str(i[0]), i[2], i[3]])
+            return data
+
+        except SQLAlchemyError as e:
+            logger.error(f"ROLLBACK EXCEPTION: {e}")
+            return
+
+    @classmethod
+    async def parents_history(cls, session: scoped_session, parents_name: str, period: int):
+        start_date = datetime.now() - timedelta(days=period)
+        end_date = datetime.now()
+
+        query = select(
+            cls.id, cls.lesson_type, cls.amount, cls.description, cls.created_at
+        ).where(
+            cls.parents_name==parents_name, between(cls.created_at, start_date, end_date) 
+        ).order_by(desc(cls.created_at))
+
+        try:
+            query_exec = await session.execute(query)
+            result = query_exec.fetchall()
+            if result is None:
+                return None
+            data = []
+
+            for i in result:
+                data.append([issue_invoice_prefix + i[1] + str(i[0]), i[2], i[3], i[4]])
             return data
 
         except SQLAlchemyError as e:
