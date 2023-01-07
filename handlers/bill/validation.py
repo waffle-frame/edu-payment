@@ -26,13 +26,14 @@ async def validation(message: Message, state: FSMContext, db: AsyncSession, spre
     sdata = await state.get_data()
 
     order_number: int | None = await Payment.create(db,
-        creator_data=f"{user.id}|{user.username}",
+        creator_username=user.username,
+        creator_telegram_id=user.id,
         lesson_type=issue_invoice_dict[sdata.get("lesson_type")], parents_name=sdata.get("parents_data").title(),
         description=sdata.get("description"), amount=int(sdata.get("cost")),
     )
     if order_number is None:
         logger.error(sdata)
-        return await message.answer("Упс, что-то пошло не так")
+        return await message.answer("⚠️ Упс, что-то пошло не так")
 
     order_id, order_link = await generate_bill(sdata["description"], sdata["cost"], order_number)
     await Payment.update(db, order_number, order_id=order_id, order_link=order_link)

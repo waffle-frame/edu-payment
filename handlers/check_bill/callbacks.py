@@ -11,23 +11,23 @@ from models.payment import Payment
 from keyboards.keyboard import parents_history_cbkb
 
 # 
-async def history_days_cb(callback: CallbackQuery, state: FSMContext, db: AsyncSession):
+async def parents_history_days_cb(callback: CallbackQuery, state: FSMContext, db: AsyncSession):
     match = re.search(rf"\bhistory_(\d+)days\b", callback.data)
     if not match:
         return
 
     # data = await Payment.parents_history(db, "Фыв Фыв", int(match.group(1)))
     sdata = await state.get_data()
-    data = await Payment.parents_history(db, sdata['parents_name'], int(match.group(1)))
+    data = await Payment.history(db, sdata['parents_name'], int(match.group(1)))
     if data is None or data == []:
-            try:
-                return await callback.message.edit_text(
-                    "⛈ Родитель не совершал оплату", 
-                    reply_markup=parents_history_cbkb()
-                )
-            except Exception:
-                return await callback.answer()
-    
+        try:
+            return await callback.message.edit_text(
+                "⛈ Родитель не совершал оплату", 
+                reply_markup=parents_history_cbkb()
+            )
+        except Exception:
+            return await callback.answer()
+
     message_text = 'Формат: Название платежа, Сумма, Описание\n'
     temp_date = datetime(2099,12,1, tzinfo=pytz.utc)
 

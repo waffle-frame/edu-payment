@@ -7,4 +7,5 @@ async def update_commands(dp: Dispatcher):
         BotCommand("start", "Запустить бота"),
         BotCommand("invoice", "Выставить счет"),
         BotCommand("check_invoice", "Проверить платеж"),
+        BotCommand("check_manager", "Проверить менеджера"),
     ])

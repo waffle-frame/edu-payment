@@ -25,13 +25,14 @@ class Payment(Base):
     ]
 
     id = Column(BigInteger, primary_key = True)
-    created_at = Column(DateTime(timezone=True), default = datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default = datetime.now().replace(microsecond=0))
 
     paid_at = Column(DateTime(timezone=True))
     status = Column(ChoiceType(PAYMENT_STATE, impl=String()), default="В ожидании")
     order_id = Column(VARCHAR(50))
     order_link = Column(String)
-    creator_data = Column(VARCHAR(100), nullable = False)   # Format: user_id|username
+    creator_username = Column(VARCHAR(100))
+    creator_telegram_id = Column(BigInteger)
 
     lesson_type = Column(VARCHAR(20), nullable = False)
     parents_name = Column(VARCHAR(50), nullable = False)
@@ -39,8 +40,11 @@ class Payment(Base):
     amount = Column(BigInteger, nullable = False)
 
     @classmethod
-    async def check_parents_name(cls, session: scoped_session, parents_name: str, **kwargs: Any) -> bool:
-        query = select(cls.id).where(cls.parents_name==parents_name).limit(1)
+    async def check_name(cls, session: scoped_session, name: str, **kwargs: Any) -> bool:
+        if name.isascii():
+            query = select(cls.id).where(cls.creator_username==name).limit(1)
+        else:
+            query = select(cls.id).where(cls.parents_name==name).limit(1)
 
         try:
             query_exec = await session.execute(query)
@@ -50,13 +54,13 @@ class Payment(Base):
             return True
 
         except SQLAlchemyError as e:
-            logger.error(f"ROLLBACK EXCEPTION: {e, parents_name, kwargs}")
+            logger.error(f"ROLLBACK EXCEPTION: {e, name, kwargs}")
             return False
 
     @classmethod
     async def check_invoice(cls, session: scoped_session, order_id: int, lesson_type: str) -> Tuple[str, datetime, str] | None:
         query = select(
-            cls.status, cls.created_at, cls.creator_data
+            cls.status, cls.created_at, cls.creator_username
         ).where(
             cls.id==order_id, cls.lesson_type==lesson_type
         )
@@ -96,7 +100,7 @@ class Payment(Base):
             return
 
     @classmethod
-    async def parents_history(cls, session: scoped_session, parents_name: str, period: int):
+    async def parents_history(cls, session: scoped_session, name: str, period: int):
         start_date = datetime.now() - timedelta(days=period)
         end_date = datetime.now()
 
@@ -120,6 +124,37 @@ class Payment(Base):
         except SQLAlchemyError as e:
             logger.error(f"ROLLBACK EXCEPTION: {e}")
             return
+
+    @classmethod
+    async def manager_history(cls, session: scoped_session, name: str, status: str, from_date: str, to_date: str | None=None):
+        start_date = datetime.strptime(from_date, '%d.%m.%Y')
+        if to_date is not None:
+            end_date = datetime.strptime(to_date, '%d-%m-%Y %H:%M:%S') + timedelta(hours=23, minutes=59, seconds=59)
+        else:
+            end_date = start_date + timedelta(hours=23, minutes=59, seconds=59)
+
+        query = select(
+            cls.id, cls.lesson_type, cls.amount, cls.description, cls.created_at, cls.status
+        ).where(
+            cls.creator_username==name, between(cls.created_at, start_date, end_date),
+            cls.status.in_([i[0] for i in cls.PAYMENT_STATE] if status=='all' else ['Оплачено'])
+        ).order_by(desc(cls.created_at))
+
+        try:
+            query_exec = await session.execute(query)
+            result = query_exec.fetchall()
+            if result is None:
+                return None
+            data = []
+
+            for i in result:
+                data.append([issue_invoice_prefix + i[1] + str(i[0]), i[2], i[3], i[4], i[5]])
+            return data
+
+        except SQLAlchemyError as e:
+            logger.error(f"ROLLBACK EXCEPTION: {e}")
+            return
+
 
     @classmethod
     async def create(cls, session: scoped_session, **kwargs: Any):

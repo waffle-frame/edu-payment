@@ -38,9 +38,20 @@ def parents_history_cbkb() -> InlineKeyboardMarkup:
         resize_keyboard=False, 
         inline_keyboard=[
             [
-                InlineKeyboardButton('7 дней', callback_data='history_7days'),
-                InlineKeyboardButton('30 дней', callback_data='history_30days'),
-                InlineKeyboardButton('За все время', callback_data='history_99999days'),
+                InlineKeyboardButton('7 дней', callback_data='phistory_7days'),
+                InlineKeyboardButton('30 дней', callback_data='phistory_30days'),
+                InlineKeyboardButton('За все время', callback_data='phistory_99999days'),
+            ]
+        ]
+    )
+
+def manager_history_cbkb() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        resize_keyboard=False,
+        inline_keyboard=[
+            [
+                InlineKeyboardButton('Все', callback_data='mhistory_all'),
+                InlineKeyboardButton('Оплаченные', callback_data='mhistory_paid'),
             ]
         ]
     )

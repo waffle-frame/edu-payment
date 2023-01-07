@@ -27,7 +27,7 @@ async def parents_name_or_invoice_data(message: Message, state: FSMContext, db: 
         return await message.answer(
             f"Статус: {order_info[0]}\n" +
             f"Создан: {order_info[1].strftime('%d.%m.%Y %H:%m')}\n" + 
-            f"Владелец: @{order_info[2].split('|')[1]}"
+            f"Владелец: @{order_info[2]}"
         )
 
     if len(message.text.split(" ")) != 2:
@@ -35,10 +35,10 @@ async def parents_name_or_invoice_data(message: Message, state: FSMContext, db: 
             "Введите полное <b>Фамилию</b> и <b>Имя</b> родителя в указанном порядке"
         )
 
-    # if not bool(re.search("[А-Яа-я]{2}", message.text)):
-    #     return await message.answer("⚠️ Вводите только в кириллице")
+    if not bool(re.search("[А-Яа-я]{2}", message.text)):
+        return await message.answer("⚠️ Вводите только в кириллице")
 
-    is_founded = await Payment.check_parents_name(db, message.text)
+    is_founded = await Payment.check_name(db, message.text)
     if is_founded is None:
         await state.finish()
         return message.answer("Родитель не найден")
