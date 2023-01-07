@@ -105,7 +105,7 @@ class Payment(Base):
         end_date = datetime.now()
 
         query = select(
-            cls.id, cls.lesson_type, cls.amount, cls.description, cls.created_at
+            cls.id, cls.lesson_type, cls.amount, cls.description, cls.created_at, cls.creator_username, cls.status
         ).where(
             cls.parents_name==parents_name, between(cls.created_at, start_date, end_date) 
         ).order_by(desc(cls.created_at))
@@ -118,7 +118,7 @@ class Payment(Base):
             data = []
 
             for i in result:
-                data.append([issue_invoice_prefix + i[1] + str(i[0]), i[2], i[3], i[4]])
+                data.append([issue_invoice_prefix + i[1] + str(i[0]), i[2], i[3], i[4], i[5], i[6]])
             return data
 
         except SQLAlchemyError as e:
