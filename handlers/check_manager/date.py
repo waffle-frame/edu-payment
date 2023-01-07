@@ -26,10 +26,10 @@ async def date(message: Message, state: FSMContext, db: AsyncSession):
     async with state.proxy() as data:
         match = match.string.split(' ')
         if len(match) == 2:
-            data["start_date"] = match[0]
-            data["end_date"] = match[1]
+            data["start_date"] = match[0].replace(".", "-")
+            data["end_date"] = match[1].replace(".", "-")
         else:
-            data["start_date"] = match[0]
+            data["start_date"] = match[0].replace(".", "-")
             data["end_date"] = None
 
     await message.answer("Выберите операцию:", reply_markup=manager_history_cbkb())

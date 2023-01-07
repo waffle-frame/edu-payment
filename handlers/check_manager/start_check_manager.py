@@ -1,7 +1,7 @@
 import re
 from aiogram.types import Message
 
-from keyboards.keyboard import reset_kb
+from keyboards.keyboard import manager_history_operations_kb
 from states.check_manager import CheckManager
 
 
@@ -9,8 +9,8 @@ from states.check_manager import CheckManager
 async def start_check_manager(message: Message):
     await message.answer("Для отмены введите команду /cancel")
     await message.answer(
-        "Укажите <b>username</b> менеджера:", 
-        reply_markup=reset_kb(),
+        "Осуществить поиск:",
+        reply_markup=manager_history_operations_kb(),
     )
 
-    await CheckManager.username.set()
+    await CheckManager.parameter.set()

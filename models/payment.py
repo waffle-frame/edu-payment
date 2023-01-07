@@ -100,7 +100,7 @@ class Payment(Base):
             return
 
     @classmethod
-    async def parents_history(cls, session: scoped_session, name: str, period: int):
+    async def parents_history(cls, session: scoped_session, parents_name: str, period: int):
         start_date = datetime.now() - timedelta(days=period)
         end_date = datetime.now()
 
@@ -126,17 +126,17 @@ class Payment(Base):
             return
 
     @classmethod
-    async def manager_history(cls, session: scoped_session, name: str, status: str, from_date: str, to_date: str | None=None):
-        start_date = datetime.strptime(from_date, '%d.%m.%Y')
+    async def manager_history(cls, session: scoped_session, from_date: str, to_date: str | None=None, status: str='all'):
+        start_date = datetime.strptime(from_date, '%d-%m-%Y')
         if to_date is not None:
-            end_date = datetime.strptime(to_date, '%d-%m-%Y %H:%M:%S') + timedelta(hours=23, minutes=59, seconds=59)
+            end_date = datetime.strptime(to_date, '%d-%m-%Y') + timedelta(hours=23, minutes=59, seconds=59)
         else:
             end_date = start_date + timedelta(hours=23, minutes=59, seconds=59)
 
         query = select(
-            cls.id, cls.lesson_type, cls.amount, cls.description, cls.created_at, cls.status
+            cls.id, cls.lesson_type, cls.amount, cls.description, cls.created_at, cls.status, cls.creator_username
         ).where(
-            cls.creator_username==name, between(cls.created_at, start_date, end_date),
+            between(cls.created_at, start_date, end_date),
             cls.status.in_([i[0] for i in cls.PAYMENT_STATE] if status=='all' else ['Оплачено'])
         ).order_by(desc(cls.created_at))
 
@@ -148,7 +148,7 @@ class Payment(Base):
             data = []
 
             for i in result:
-                data.append([issue_invoice_prefix + i[1] + str(i[0]), i[2], i[3], i[4], i[5]])
+                data.append([issue_invoice_prefix + i[1] + str(i[0]), i[2], i[3], i[4], i[5], i[6]])
             return data
 
         except SQLAlchemyError as e:

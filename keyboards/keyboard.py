@@ -2,7 +2,7 @@ from aiogram.types import ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboa
 
 from utils.bot.list_to_buttons import list_to_buttons
 from keyboards.buttons import operations_list, issue_invoice_dict, \
-    validation_list, parent_history_operations_list
+    validation_list, parent_history_operations_list, manager_history_operations_list
 
 
 def operations_kb() -> ReplyKeyboardMarkup:
@@ -14,6 +14,12 @@ def operations_kb() -> ReplyKeyboardMarkup:
 def parents_history_operations_kb() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=list_to_buttons(parent_history_operations_list),
+        resize_keyboard=True, one_time_keyboard=True
+    )
+
+def manager_history_operations_kb() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=list_to_buttons(manager_history_operations_list),
         resize_keyboard=True, one_time_keyboard=True
     )
 
@@ -52,6 +58,20 @@ def manager_history_cbkb() -> InlineKeyboardMarkup:
             [
                 InlineKeyboardButton('Все', callback_data='mhistory_all'),
                 InlineKeyboardButton('Оплаченные', callback_data='mhistory_paid'),
+            ]
+        ]
+    )
+
+def manager_history_periods_cbkb() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        resize_keyboard=False,
+        inline_keyboard=[
+            [
+                InlineKeyboardButton('Последние 7 дней', callback_data='mperiod_history_7days'),
+                InlineKeyboardButton('Последние 30 дней', callback_data='mperiod_history_30days'),
+            ],
+            [
+                InlineKeyboardButton('Весь период', callback_data='mperiod_history_9999days'),
             ]
         ]
     )
