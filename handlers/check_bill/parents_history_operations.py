@@ -17,7 +17,7 @@ async def parents_history_operations(message: Message, state: FSMContext, db: As
         sdata = await state.get_data()
         data = await Payment.paid_invoice(db, sdata['parents_name'])
         if data is None or data == []:
-            return await message.answer("⛈ Оплаченные заказы отсутствуют")
+            return await message.answer("⛈ Оплаченные заказы отсутствуют", reply_markup=parents_history_operations_kb())
 
         message_text = 'Формат: Название платежа, Сумма\n'
         temp_date = datetime(2099,12,1, tzinfo=pytz.utc)

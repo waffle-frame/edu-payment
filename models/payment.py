@@ -25,7 +25,7 @@ class Payment(Base):
     ]
 
     id = Column(BigInteger, primary_key = True)
-    created_at = Column(DateTime(timezone=True), default = datetime.now().replace(microsecond=0))
+    created_at = Column(DateTime(timezone=False), default = datetime.now().replace(microsecond=0))
 
     paid_at = Column(DateTime(timezone=True))
     status = Column(ChoiceType(PAYMENT_STATE, impl=String()), default="В ожидании")
@@ -135,12 +135,12 @@ class Payment(Base):
         if to_date is not None:
             end_date = datetime.strptime(to_date, '%d-%m-%Y') + timedelta(hours=23, minutes=59, seconds=59)
         else:
-            end_date = start_date + timedelta(hours=23, minutes=59, seconds=59)
+            end_date = start_date + timedelta(hours=23, minutes=59, seconds=50)
 
         query = select(
             cls.id, cls.lesson_type, cls.amount, cls.description, cls.created_at, cls.status, cls.creator_username
         ).where(
-            creator_username, between(cls.created_at, start_date, end_date),
+            creator_username, cls.created_at.between(start_date, end_date),
             cls.status.in_([i[0] for i in cls.PAYMENT_STATE] if status=='all' else ['Оплачено'])
         ).order_by(desc(cls.created_at))
 
@@ -202,7 +202,6 @@ class Payment(Base):
 
 
         date_range_ = date_now + timedelta(days=-date_range)
-        print(date_range_, date_now)
 
         query = "SELECT id::varchar, order_id, lesson_type " + \
                 "FROM payments " + \

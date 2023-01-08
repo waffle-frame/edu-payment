@@ -7,7 +7,7 @@ from aiogram.dispatcher import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.payment import Payment
-from keyboards.keyboard import manager_history_cbkb
+from keyboards.keyboard import manager_history_cbkb, operations_kb
 
 # 
 async def manager_history_cb(callback: CallbackQuery, state: FSMContext, db: AsyncSession):
@@ -18,12 +18,14 @@ async def manager_history_cb(callback: CallbackQuery, state: FSMContext, db: Asy
     sdata = await state.get_data()
     if sdata.get("start_date") is None:
         await state.finish()
-        return await callback.message.edit_text("Запрос устарел")
+        return await callback.message.edit_text("Запрос устарел. Введите команду /start")
+
+    name: str = sdata.get("username", 'all')
 
     if sdata.get('end_date') is None:
-        data = await Payment.manager_history(db, sdata['start_date'], status=match.group(1))
+        data = await Payment.manager_history(db, sdata['start_date'], status=match.group(1), name=name)
     else:
-        data = await Payment.manager_history(db, sdata['start_date'], sdata['end_date'], match.group(1))
+        data = await Payment.manager_history(db, sdata['start_date'], sdata['end_date'], match.group(1), name=name)
 
     if data is None or data == []:
         try:
@@ -50,7 +52,6 @@ async def manager_history_cb(callback: CallbackQuery, state: FSMContext, db: Asy
 
 async def manager_history_periods_cb(callback: CallbackQuery, state: FSMContext, db: AsyncSession):
     match = re.search(rf"\bmperiod_history_(\d+)days\b", callback.data)
-    print(callback.data, match.string)
     if not match:
         return
 
@@ -76,14 +77,14 @@ async def manager_history_periods_cb(callback: CallbackQuery, state: FSMContext,
         except Exception:
             return await callback.answer()
     
-    message_text = 'Формат: Название платежа, Сумма, Описание, Статус\n'
+    message_text = 'Формат: Название платежа, Сумма, Описание, Кем создано, Статус\n'
     temp_date = datetime(2099,12,1, tzinfo=pytz.utc)
 
     for i in data:
         if i[3].date() != temp_date.date():
             temp_date = i[3]
             message_text += '\n<b>' + temp_date.strftime("%d.%m.%Y") + '</b>\n'
-        message_text += f'<code>{i[0]}</code>, {i[1]//100}.{i[1]%100}₽, <i>{i[2]}</i>, {i[4]}\n'
+        message_text += f'<code>{i[0]}</code>, {i[1]//100}.{i[1]%100}₽, <i>{i[2]}</i>, @{i[5]}, {i[4]}\n'
 
     try:
         await callback.message.edit_text(message_text, reply_markup=manager_history_cbkb())
