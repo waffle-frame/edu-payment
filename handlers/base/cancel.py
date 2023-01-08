@@ -2,6 +2,7 @@ from loguru import logger
 from aiogram.dispatcher import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove, ContentType
 
+from keyboards.keyboard import operations_kb
 from settings.bot import dp
 
 @dp.message_handler(commands=["cancel"], content_types=ContentType.all(), state="*")
@@ -13,4 +14,4 @@ async def cancel_state(message: Message, state: FSMContext):
     logger.info(f"Cancelling state -> | {current_state} |")
 
     await state.reset_state()
-    await message.reply("Диалог прекращён, данные удалены", reply_markup=ReplyKeyboardRemove())
+    await message.reply("Диалог прекращён, данные удалены", reply_markup=operations_kb())

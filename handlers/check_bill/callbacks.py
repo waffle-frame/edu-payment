@@ -7,7 +7,6 @@ from aiogram.dispatcher import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.payment import Payment
-from keyboards.buttons import statuses
 from keyboards.keyboard import parents_history_cbkb
 
 # 
@@ -39,7 +38,7 @@ async def parents_history_days_cb(callback: CallbackQuery, state: FSMContext, db
         if i[3].date() != temp_date.date():
             temp_date = i[3]
             message_text += '\n<b>' + temp_date.strftime("%d.%m.%Y") + '</b>\n'
-        message_text += f'<code>{i[0]}</code>, {i[1]//100}.{i[1]%100}₽, <i>{i[2]}</i>, @{i[4]}, {statuses[i[5]]}\n'
+        message_text += f'<code>{i[0]}</code>, {i[1]//100}.{i[1]%100}₽, <i>{i[2]}</i>, @{i[4]}, {i[5]}\n'
 
     try:
         await callback.message.edit_text(message_text, reply_markup=parents_history_cbkb())

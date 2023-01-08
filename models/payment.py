@@ -126,7 +126,11 @@ class Payment(Base):
             return
 
     @classmethod
-    async def manager_history(cls, session: scoped_session, from_date: str, to_date: str | None=None, status: str='all'):
+    async def manager_history(cls, session: scoped_session, from_date: str, to_date: str | None=None, status: str='all', name: str='all'):
+        creator_username = cls.creator_username.isnot(None)
+        if name != 'all':
+            creator_username = cls.creator_username==name
+
         start_date = datetime.strptime(from_date, '%d-%m-%Y')
         if to_date is not None:
             end_date = datetime.strptime(to_date, '%d-%m-%Y') + timedelta(hours=23, minutes=59, seconds=59)
@@ -136,7 +140,7 @@ class Payment(Base):
         query = select(
             cls.id, cls.lesson_type, cls.amount, cls.description, cls.created_at, cls.status, cls.creator_username
         ).where(
-            between(cls.created_at, start_date, end_date),
+            creator_username, between(cls.created_at, start_date, end_date),
             cls.status.in_([i[0] for i in cls.PAYMENT_STATE] if status=='all' else ['Оплачено'])
         ).order_by(desc(cls.created_at))
 

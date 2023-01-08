@@ -15,7 +15,7 @@ async def parents_data(message: Message, state: FSMContext):
         return await message.answer("⚠️ Вводите только в кириллице")
 
     async with state.proxy() as data:
-        data["parents_data"] = message.text
+        data["parents_data"] = message.text.title()
 
     await message.answer("Введите описание:", reply_markup=reset_kb())
     await IssueInvoice.description.set()

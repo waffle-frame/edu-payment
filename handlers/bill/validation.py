@@ -10,8 +10,8 @@ from utils.bill.generate_bill import generate_bill
 from utils.spreadsheets.create_row import create_rows
 from utils.spreadsheets.check_rows import check_count_rows
 from handlers.bill.start_issue_invoice_operation import start_issue_invoice_operation
-from keyboards.buttons import validation_list, issue_invoice_prefix
-from keyboards.buttons import issue_invoice_dict
+from keyboards.buttons import validation_list, issue_invoice_prefix, issue_invoice_dict
+from keyboards.keyboard import operations_kb
 
 #
 async def validation(message: Message, state: FSMContext, db: AsyncSession, spread_client: Client):
@@ -28,7 +28,7 @@ async def validation(message: Message, state: FSMContext, db: AsyncSession, spre
     order_number: int | None = await Payment.create(db,
         creator_username=user.username,
         creator_telegram_id=user.id,
-        lesson_type=issue_invoice_dict[sdata.get("lesson_type")], parents_name=sdata.get("parents_data").title(),
+        lesson_type=issue_invoice_dict[sdata.get("lesson_type")], parents_name=sdata.get("parents_data"),
         description=sdata.get("description"), amount=int(sdata.get("cost")),
     )
     if order_number is None:
@@ -40,7 +40,7 @@ async def validation(message: Message, state: FSMContext, db: AsyncSession, spre
 
     await message.answer(
         f"Счет на оплату успешно создан!\nНомер заказа: <code>{issue_invoice_prefix+issue_invoice_dict[sdata['lesson_type']]}{order_number}</code>\n" + \
-        f"Ссылка на оплату: {order_link}\n\nСсылка активна в течении 2-уx недель"
+        f"Ссылка на оплату: {order_link}\n\nСсылка активна в течении 2-уx недель", reply_markup=operations_kb()
     )
     await state.finish()
 
