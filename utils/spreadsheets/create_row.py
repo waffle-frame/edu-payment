@@ -20,3 +20,5 @@ def create_rows(spread_client: Client, file: str, data):
             non_empty_rows.append(i)
 
     spread.insert_rows(len(non_empty_rows), values=data, inherit=False)
+
+    
