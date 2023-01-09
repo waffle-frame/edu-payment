@@ -1,14 +1,11 @@
 from os import environ
 from pygsheets.client import Client
 from pygsheets.worksheet import Worksheet
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from models.pushes import Push
 
 
-async def create_rows(db_client: AsyncSession, spread_client: Client, file: str, offset: int):
+def create_rows(spread_client: Client, file: str, data):
     """
-        create_row ...
+        create_rows ...
     """
 
     file_id = environ.get(f"SPREADSHEETS_{file.upper()}")
@@ -22,5 +19,6 @@ async def create_rows(db_client: AsyncSession, spread_client: Client, file: str,
         if i != []:
             non_empty_rows.append(i)
 
-    data = await Push.get_data_for_upload(db_client, offset)
+    print(file)
+
     spread.insert_rows(len(non_empty_rows), values=data, inherit=False)

@@ -11,7 +11,7 @@ async def insert_data():
     conf = load_config().database
     engine, _= setup_database(conf)
     
-    data = ["test","group","short","special","intensive","individual"]
+    data = ["test","group","short","special","intensive","individual", 'all']
 
     async with engine.begin() as conn:
         for i in data:
