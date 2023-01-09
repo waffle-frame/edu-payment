@@ -58,7 +58,6 @@ class Push(Base):
         try:
             data_exec = await session.execute(query_data)
             result = data_exec.fetchall()
-            print(result)
             if result == []:
                 return None
 

@@ -19,6 +19,4 @@ def create_rows(spread_client: Client, file: str, data):
         if i != []:
             non_empty_rows.append(i)
 
-    print(file)
-
     spread.insert_rows(len(non_empty_rows), values=data, inherit=False)
