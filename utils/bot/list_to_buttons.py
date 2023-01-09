@@ -20,6 +20,10 @@ def list_to_buttons(list_: List | dict_keys, count: int = 2) -> List[List[Keyboa
 
     if temp_list != []:
         splitted_list.append(temp_list)
-    splitted_list.append(KeyboardButton('◀️ В главное меню'))
+
+    if type(list_) is list:
+        if list_[0] != 'Выставить счет':
+            splitted_list.append([KeyboardButton('◀️ В главное меню')])
+
 
     return splitted_list

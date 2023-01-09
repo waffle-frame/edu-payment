@@ -25,7 +25,7 @@ def manager_history_operations_kb() -> ReplyKeyboardMarkup:
 
 def issue_invoice_kb() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
-        keyboard=list_to_buttons(issue_invoice_dict.keys()),
+        keyboard=list_to_buttons(list(issue_invoice_dict.keys())),
         resize_keyboard=True, one_time_keyboard=True
     )
 
