@@ -12,7 +12,7 @@ error_code_to_string = {
     6: "Не актуально",
 }
 
-async def check_bill(order_data: List[Tuple[str, str]]) -> List[Tuple[str, str, str, str]]:
+async def check_bill(order_data: List) -> List:
     """
         check_bill ...
     """
@@ -25,7 +25,9 @@ async def check_bill(order_data: List[Tuple[str, str]]) -> List[Tuple[str, str, 
         "userName": bill_env.get("userName"),
         "password": bill_env.get("password"),
     }
-    # 
+
+    updated_order_data = []
+
     async with ClientSession() as session:
         for index in range(len(order_data)):
             if order_data[index][1] is None:
@@ -43,13 +45,12 @@ async def check_bill(order_data: List[Tuple[str, str]]) -> List[Tuple[str, str, 
                             logger.error(f"response is {data['errorMessage']}, Data: {order_data[index]}")
                             break
 
+                    # Set
                     if "orderStatus" in data:
-                        # logger.info(data)
-                        print(order_data[index], type(order_data[index]))
-                        order_data[index] += error_code_to_string[data["orderStatus"]],
-                        if data["orderStatus"] == 2:
-                            order_data.remove(order_data[index])
-                            break
+                        if data["orderStatus"] != 0:
+                            order_data[index].append(error_code_to_string[data["orderStatus"]])
+                            updated_order_data.append(order_data[index])
                         break
+
         await session.close()
-    return order_data
+    return updated_order_data

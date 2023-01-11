@@ -1,6 +1,5 @@
 from loguru import logger
 from aiogram.types import Message
-from pygsheets.client import Client
 from aiogram.dispatcher import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,7 +11,7 @@ from keyboards.buttons import validation_list, issue_invoice_prefix, issue_invoi
 from keyboards.keyboard import operations_kb
 
 #
-async def validation(message: Message, state: FSMContext, db: AsyncSession, spread_client: Client):
+async def validation(message: Message, state: FSMContext, db: AsyncSession):
     if message.text not in validation_list:
         return await message.answer("Вариант не существует")
 

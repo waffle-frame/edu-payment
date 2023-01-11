@@ -9,8 +9,11 @@ async def check_rows(db: scoped_session, file_name: str="test"):
     
     offset = await Push.get_offset(db, file_name)
 
-    data = await Push.get_data_for_upload(db, offset, file_name)
-    if data is None or data == []:
-        return None
+    data, sheets = await Push.get_data_for_upload(db, offset, file_name)
+    if data is None or sheets is None:
+        return None, sheets
 
-    return data
+    if data == []:
+        return None, sheets
+
+    return data, sheets

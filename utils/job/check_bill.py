@@ -10,7 +10,9 @@ async def check_bill_last_14_days_job(db_session,  spread_client: Client):
 
     orders = await check_bill(order_ids)
 
-    update_states(spread_client, orders)
+    await Payment.update_status(db_session, orders)
+
+    await update_states(spread_client, db_session, orders)
 
 
 async def check_bill_last_60_days_job(db_session,  spread_client: Client):
@@ -18,7 +20,9 @@ async def check_bill_last_60_days_job(db_session,  spread_client: Client):
 
     orders = await check_bill(order_ids)
 
-    update_states(spread_client, orders)
+    await Payment.update_status(db_session, orders)
+
+    await update_states(spread_client, db_session, orders)
 
 
 async def check_bill_over_60_days_job(db_session,  spread_client: Client):
@@ -26,5 +30,6 @@ async def check_bill_over_60_days_job(db_session,  spread_client: Client):
 
     orders = await check_bill(order_ids)
 
-    update_states(spread_client, orders)
+    await Payment.update_status(db_session, orders)
 
+    await update_states(spread_client, db_session, orders)

@@ -1,31 +1,37 @@
 from os import environ
+from typing import List
 from loguru import logger
-from typing import List, Tuple
 from pygsheets.client import Client
-from pygsheets.custom_types import HorizontalAlignment
-from pygsheets.worksheet import Worksheet, Cell, Address
+from pygsheets.worksheet import Worksheet
 
-from utils.spreadsheets.colors import colors
 from keyboards.buttons import issue_invoice_prefix
+from utils.spreadsheets.check_rows_in_sheet import check_rows_in_sheet
 
 
-def update_states(spread_client: Client, data: List[Tuple[str, str, str, str]]):
-    file_id = environ.get(f"SPREADSHEETS_TEST")
-    spreads = spread_client.open_by_key(file_id)
-    spread: Worksheet = spreads[0]  # type: ignore
-
-    spread_data = spread.get_all_values(include_tailing_empty=False, include_tailing_empty_rows=False)
-    cells = []
-
+async def update_states(spread_client: Client, db_session, data: List):
+    temp_file_name = ""
     for i in data:
-        for j in range(len(spread_data)):
-            if issue_invoice_prefix+i[2]+i[0] == spread_data[j][0]:
-                cell = Cell(Address(f"C{j+1}"), val=i[3])
-                cell.color = colors[i[3]]
-                cell.set_horizontal_alignment(HorizontalAlignment.CENTER)
-                cells.append(cell)
+        if i[2] != temp_file_name:
+            temp_file_name += i[2]
+            file_id = environ.get(f"SPREADSHEETS_{i[2].upper()}")
+            sheets = spread_client.open_by_key(file_id)
+            sheet: Worksheet = sheets[i[3]]  # type: ignore 
 
-    try:
-        spread.update_cells(cells)
-    except Exception as e:
-        logger.error(e)
+        spread_data = sheet.get_values(start='A2', end='B100000')
+        prefix = issue_invoice_prefix+i[2]+i[0]
+        cells = []
+
+        print(spread_data, data)
+
+        for i in data:
+            for j in range(len(spread_data)):
+                print(prefix, spread_data[j][0])
+                if prefix == spread_data[j][0]:
+                    cells.append([prefix, i[3]])
+
+        spread = await check_rows_in_sheet(spread_client, sheets, db_session, len(spread_data), i[2])
+
+        try:
+            spread.update_values(crange='A2:B100000', values=cells)
+        except Exception as e:
+            logger.error(e)

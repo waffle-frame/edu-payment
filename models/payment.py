@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy_utils.types import ChoiceType
+from sqlalchemy.sql.expression import bindparam
 from sqlalchemy import insert, update, select, desc, between
 from sqlalchemy import Column, String, DateTime, VARCHAR, BigInteger
 
@@ -187,7 +188,7 @@ class Payment(Base):
             return
 
     @classmethod
-    async def check_status(cls, session: scoped_session, date_range:int) -> List[Tuple[str, str]]:
+    async def check_status(cls, session: scoped_session, date_range:int) -> List:
         """
             check_status
             :params `date_range` indicated in minutes
@@ -203,17 +204,45 @@ class Payment(Base):
 
         date_range_ = date_now + timedelta(days=-date_range)
 
-        query = "SELECT id::varchar, order_id, lesson_type " + \
-                "FROM payments " + \
+        query = "SELECT pay.id::varchar, pay.order_id, pay.lesson_type, push.sheet " + \
+                "FROM payments AS pay " + \
+                "JOIN pushes AS push ON push.file = pay.lesson_type " + \
                 "WHERE status = 'В ожидании' " + \
-                f"AND created_at BETWEEN '{date_range_.__str__() + (' 00:00:00')}'::timestamp and '{date_now.__str__() + (' 23:59:59')}'::timestamp " + \
-                "ORDER BY lesson_type;"
+                    f"AND created_at BETWEEN '{date_range_.__str__() + (' 00:00:00')}'::timestamp " + \
+                    f"AND '{date_now.__str__() + (' 23:59:59')}'::timestamp " + \
+                "ORDER BY pay.lesson_type;"
     
         try:
             query_exec = await session.execute(query)
             result = query_exec.fetchall()
-            return [ tuple(i) for i in result]
+            return [ list(i) for i in result]
         except SQLAlchemyError as e:
             logger.error(f"ROLLBACK: {e, date_range}")
+            await session.rollback()                        # type: ignore
+            return                                          # type: ignore
+
+    @classmethod
+    async def update_status(cls, session: scoped_session, orders: List):
+        """
+            update_status
+            :params `orders` list of orders
+        """
+
+        data_for_update = []
+
+        for i in orders:
+            data_for_update.append({'status': i[-1], '_id': int(i[0])})
+
+        if data_for_update == []:
+            return
+
+        query = update(cls).where(cls.id==bindparam('_id')).values({'status': bindparam('status')})
+
+        try:
+            await session.execute(query, data_for_update)
+            await session.commit()                          # type: ignore
+
+        except SQLAlchemyError as e:
+            logger.error(f"ROLLBACK: {e, orders}")
             await session.rollback()                        # type: ignore
             return                                          # type: ignore
