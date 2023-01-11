@@ -10,8 +10,8 @@ from states.issue_invoice import IssueInvoice
 async def cost(message: Message, state: FSMContext):
     if not message.text.isdigit():
         return await message.answer("Не верный тип данных. Введите стоимость в цифрах\n\nНапример: 300000")
-    if len(message.text) > 12:
-        return await message.answer("Сумма не может превышать больше 100,000,000,000 рублей")
+    if int(message.text) > 4294967295:
+        return await message.answer("Сумма не может превышать больше 4294967295 рублей")
 
     async with state.proxy() as data:
         data["cost"] = message.text

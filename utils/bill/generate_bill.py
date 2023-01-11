@@ -1,12 +1,12 @@
 import json
 
-from typing import Tuple
+from typing import Tuple, List
 from loguru import logger 
 from aiohttp import ClientSession
 
 from settings.spreadsheets import bill_env
 
-async def generate_bill(description: str, pennies: int, order_number: int) -> Tuple[str, str]:
+async def generate_bill(description: str, pennies: int, order_number: int) -> Tuple[str, str] | None:
     """
         generate_bill ...
     """
@@ -34,6 +34,8 @@ async def generate_bill(description: str, pennies: int, order_number: int) -> Tu
                 data = json.loads(response)
                 logger.info(data)
 
+                if 'errorCode' == '32':
+                    return None, None
                 if 'errorMessage' in data:
                     if data['errorMessage'] == 'Заказ с таким номером уже обработан':
                         params['orderNumber'] = params['orderNumber'] + 1000

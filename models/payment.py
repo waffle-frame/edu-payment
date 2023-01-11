@@ -194,13 +194,16 @@ class Payment(Base):
             :params `date_range` indicated in minutes
         """
 
-        if date_range == 60:
+        if date_range == 7:
+            date_now = datetime.now().date() + timedelta(days=-3)
+        elif date_range == 2:
+            date_now = datetime.now().date() + timedelta(days=-7)
+        elif date_range == 60:
             date_now = datetime.now().date() + timedelta(days=-14)
         elif date_range > 60:
             date_now = datetime.now().date() + timedelta(days=-60)
         else:
             date_now = datetime.now().date()
-
 
         date_range_ = date_now + timedelta(days=-date_range)
 
@@ -211,6 +214,8 @@ class Payment(Base):
                     f"AND created_at BETWEEN '{date_range_.__str__() + (' 00:00:00')}'::timestamp " + \
                     f"AND '{date_now.__str__() + (' 23:59:59')}'::timestamp " + \
                 "ORDER BY pay.lesson_type;"
+
+        # print(date_range_, date_now.__str__() + (' 23:59:59'), query)
     
         try:
             query_exec = await session.execute(query)

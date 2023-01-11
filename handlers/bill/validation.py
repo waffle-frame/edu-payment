@@ -36,6 +36,9 @@ async def validation(message: Message, state: FSMContext, db: AsyncSession):
         return await message.answer("⚠️ Упс, что-то пошло не так")
 
     order_id, order_link = await generate_bill(sdata["description"], sdata["cost"], order_number)
+    if order_id is None:
+        return await message.answer("Сумма не должна превышать 42949672.95 рублей")
+
     await Payment.update(db, order_number, order_id=order_id, order_link=order_link)
 
     await message.answer(

@@ -5,7 +5,16 @@ from utils.bill.check_status import check_bill
 from utils.spreadsheets.update_row import update_states
 
 
-async def check_bill_last_14_days_job(db_session,  spread_client: Client):
+async def check_bill_last_3_days_job(db_session,  spread_client: Client):
+    order_ids = await Payment.check_status(db_session, 3)
+
+    orders = await check_bill(order_ids)
+
+    await Payment.update_status(db_session, orders)
+
+    await update_states(spread_client, db_session, orders)
+
+async def check_bill_last_7_days_job(db_session,  spread_client: Client):
     order_ids = await Payment.check_status(db_session, 14)
 
     orders = await check_bill(order_ids)
@@ -14,6 +23,14 @@ async def check_bill_last_14_days_job(db_session,  spread_client: Client):
 
     await update_states(spread_client, db_session, orders)
 
+async def check_bill_last_14_days_job(db_session,  spread_client: Client):
+    order_ids = await Payment.check_status(db_session, 14)
+
+    orders = await check_bill(order_ids)
+
+    await Payment.update_status(db_session, orders)
+
+    await update_states(spread_client, db_session, orders)
 
 async def check_bill_last_60_days_job(db_session,  spread_client: Client):
     order_ids = await Payment.check_status(db_session, 60)
