@@ -1,7 +1,7 @@
 import json
 
+from typing import List
 from loguru import logger 
-from typing import List, Tuple
 from aiohttp import ClientSession
 
 from settings.spreadsheets import bill_env
@@ -9,6 +9,8 @@ from settings.spreadsheets import bill_env
 error_code_to_string = {
     0: "В ожидании",
     2: "Оплачено",
+    5: "Оплачено",
+    4: "Возрат средств",
     6: "Не актуально",
 }
 
@@ -47,6 +49,7 @@ async def check_bill(order_data: List) -> List:
 
                     # Set
                     if "orderStatus" in data:
+                        logger.info(data)
                         if data["orderStatus"] != 0:
                             order_data[index].append(error_code_to_string[data["orderStatus"]])
                             updated_order_data.append(order_data[index])
