@@ -13,25 +13,32 @@ async def update_states(spread_client: Client, db_session, data: List):
     for i in data:
         if i[2] != temp_file_name:
             temp_file_name += i[2]
+            # file_id = environ.get(f"SPREADSHEETS_TEST")
             file_id = environ.get(f"SPREADSHEETS_{i[2].upper()}")
             sheets = spread_client.open_by_key(file_id)
             sheet: Worksheet = sheets[i[3]]  # type: ignore 
 
-        spread_data = sheet.get_values(start='A2', end='B100000')
+        spread_data = sheet.get_values(start='A2', end='B100000', returnas='matrix')
         prefix = issue_invoice_prefix+i[2]+i[0]
-        cells = []
+        update_datas = []
 
-        print(spread_data, data)
+        non_empty_rows = []
+        for i in spread_data:
+            if i != []:
+                non_empty_rows.append(i)
 
         for i in data:
             for j in range(len(spread_data)):
-                print(prefix, spread_data[j][0])
+                # print(prefix, spread_data[j][0])
                 if prefix == spread_data[j][0]:
-                    cells.append([prefix, i[3]])
+                    update_datas.append([i[-1]])
 
-        spread = await check_rows_in_sheet(spread_client, sheets, db_session, len(spread_data), i[2])
+        new_sheet = await check_rows_in_sheet(spread_client, sheets, db_session, len(spread_data), i[2])
+        if new_sheet is not None:
+            sheet = new_sheet
 
         try:
-            spread.update_values(crange='A2:B100000', values=cells)
+            sheet.update_values(crange=f'B2:B{len(spread_data)}', values=update_datas)
         except Exception as e:
             logger.error(e)
+            pass

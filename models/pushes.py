@@ -20,7 +20,7 @@ class Push(Base):
     id = Column(BigInteger, primary_key = True)
     file = Column(VARCHAR, nullable = False)
     offset = Column(BigInteger, default=0)
-    sheet = Column(BigInteger, default=1)
+    sheet = Column(BigInteger, default=0)
 
     @classmethod
     async def get_offset(cls, session: scoped_session, file_name: str) -> int:
