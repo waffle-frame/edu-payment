@@ -27,4 +27,6 @@ async def create_rows(spread_client: Client, db_session,  file: str, data, sheet
     if new_sheet is not None:
         sheet = new_sheet 
 
+    print(data)
+
     sheet.insert_rows(len(non_empty_rows), values=data, inherit=False)

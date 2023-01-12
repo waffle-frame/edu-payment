@@ -44,13 +44,14 @@ async def check_bill(order_data: List) -> List:
 
                     if "errorCode" in data:
                         if data["errorCode"] == '6':
+                            logger.error(data)
                             logger.error(f"response is {data['errorMessage']}, Data: {order_data[index]}")
                             break
 
                     # Set
                     if "orderStatus" in data:
-                        logger.info(data)
                         if data["orderStatus"] != 0:
+                            logger.info("ORDER STATUS:", data["orderStatus"], "ORDER_ID", params["orderId"])
                             order_data[index].append(error_code_to_string[data["orderStatus"]])
                             updated_order_data.append(order_data[index])
                         break

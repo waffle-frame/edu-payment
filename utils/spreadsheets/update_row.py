@@ -29,8 +29,8 @@ async def update_states(spread_client: Client, db_session, data: List):
 
         for i in data:
             for j in range(len(spread_data)):
-                # print(prefix, spread_data[j][0])
                 if prefix == spread_data[j][0]:
+                    print("APPEND!!!", i[-1])
                     update_datas.append([i[-1]])
 
         new_sheet = await check_rows_in_sheet(spread_client, sheets, db_session, len(spread_data), i[2])
@@ -38,7 +38,7 @@ async def update_states(spread_client: Client, db_session, data: List):
             sheet = new_sheet
 
         try:
-            sheet.update_values(crange=f'B2:B{len(spread_data)}', values=update_datas)
+            sheet.update_values(crange=f'B2:B{len(spread_data)+1}', values=update_datas)
         except Exception as e:
             logger.error(e)
             pass
