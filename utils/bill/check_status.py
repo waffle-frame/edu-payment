@@ -2,6 +2,7 @@ import json
 
 from typing import List
 from loguru import logger 
+from datetime import datetime
 from aiohttp import ClientSession
 
 from settings.spreadsheets import bill_env
@@ -32,11 +33,11 @@ async def check_bill(order_data: List) -> List:
 
     async with ClientSession() as session:
         for index in range(len(order_data)):
-            if order_data[index][1] is None:
+            if order_data[index][0] is None:
                 logger.error(f"order id is not found, ID: {order_data[index]}")
                 continue
 
-            params["orderId"] = order_data[index][1]
+            params["orderId"] = order_data[index][0]
             while True:
                 async with session.get(url, params=params) as bill_request:
                     response = await bill_request.read()
@@ -50,11 +51,22 @@ async def check_bill(order_data: List) -> List:
 
                     # Set
                     if "orderStatus" in data:
-                        if data["orderStatus"] != 0:
-                            logger.info("ORDER STATUS:", data["orderStatus"], "ORDER_ID", params["orderId"])
-                            order_data[index].append(error_code_to_string[data["orderStatus"]])
+                        order_data[index].append(error_code_to_string[data["orderStatus"]])
+                        logger.info(data)
+                        if data["orderStatus"] == 2 or data["orderStatus"] == 5:
+                            if "depositedDate" in data:
+                                # UNIX to timestamp
+                                datetime_ = datetime.fromtimestamp(data["depositedDate"] // 1000)
+                                order_data[index].append(datetime_)
+                                updated_order_data.append(order_data[index])
+                                break
+                            continue
+                        elif data["orderStatus"] != 0:
+                            order_data[index].append(datetime.now())
                             updated_order_data.append(order_data[index])
-                        break
+                            break
+                        else:
+                            break
 
         await session.close()
     return updated_order_data

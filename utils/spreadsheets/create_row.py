@@ -21,12 +21,15 @@ async def create_rows(spread_client: Client, db_session,  file: str, data, sheet
     non_empty_rows = []
     for i in cells:
         if i != []:
-            non_empty_rows.append(i)
+            if i[0] != "":
+                non_empty_rows.append(i)
+
+    print(non_empty_rows)
 
     new_sheet = await check_rows_in_sheet(spread_client, sheets, db_session, len(non_empty_rows), file)
     if new_sheet is not None:
         sheet = new_sheet 
 
-    print(data)
+    print([ i[0] for i in data ])
 
     sheet.insert_rows(len(non_empty_rows), values=data, inherit=False)

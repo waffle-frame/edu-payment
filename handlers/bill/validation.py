@@ -35,14 +35,16 @@ async def validation(message: Message, state: FSMContext, db: AsyncSession):
         logger.error(sdata)
         return await message.answer("⚠️ Упс, что-то пошло не так")
 
-    order_id, order_link = await generate_bill(sdata["description"], sdata["cost"], order_number)
-    if order_id is None:
+    order = issue_invoice_prefix+issue_invoice_dict[sdata['lesson_type']]
+
+    order_id, order_link = await generate_bill(sdata["description"], sdata["cost"], order)
+    if order_id == "" or order_link == "":
         return await message.answer("Сумма не должна превышать 42949672.95 рублей")
 
     await Payment.update(db, order_number, order_id=order_id, order_link=order_link)
 
     await message.answer(
-        f"Счет на оплату успешно создан!\nНомер заказа: <code>{issue_invoice_prefix+issue_invoice_dict[sdata['lesson_type']]}{order_number}</code>\n" + \
+        f"Счет на оплату успешно создан!\nНомер заказа: <code>{order}{order_number}</code>\n" + \
         f"Ссылка на оплату: {order_link}\n\nСсылка активна в течении 2-уx недель", reply_markup=operations_kb()
     )
     await state.finish()

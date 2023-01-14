@@ -16,6 +16,6 @@ async def setup_scheduler(db_session: scoped_session, spread_client: Client):
     scheduler.add_job(check_bill_last_60_days_job, trigger='interval', hours=1, kwargs={"db_session": db_session(), "spread_client": spread_client})
     scheduler.add_job(check_bill_over_60_days_job, trigger='interval', days=1, kwargs={"db_session": db_session(), "spread_client": spread_client})
 
-    scheduler.add_job(check_database_rows, trigger='interval', seconds=10, kwargs={"db_session": db_session(), "spread_client": spread_client})
+    scheduler.add_job(check_database_rows, trigger='interval', seconds=5, kwargs={"db_session": db_session(), "spread_client": spread_client})
 
     scheduler.start()

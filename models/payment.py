@@ -27,7 +27,7 @@ class Payment(Base):
     ]
 
     id = Column(BigInteger, primary_key = True)
-    created_at = Column(DateTime(timezone=False), default = datetime.now().replace(microsecond=0))
+    created_at = Column(DateTime(timezone=True), default = datetime.now().replace(microsecond=0))
 
     paid_at = Column(DateTime(timezone=True))
     status = Column(ChoiceType(PAYMENT_STATE, impl=String()), default="В ожидании")
@@ -40,6 +40,7 @@ class Payment(Base):
     parents_name = Column(VARCHAR(50), nullable = False)
     description = Column(VARCHAR(512))
     amount = Column(BigInteger, nullable = False)
+    row = Column(BigInteger, nullable = False, )
 
     @classmethod
     async def check_name(cls, session: scoped_session, name: str, **kwargs: Any) -> bool:
@@ -161,13 +162,31 @@ class Payment(Base):
             logger.error(f"ROLLBACK EXCEPTION: {e}")
             return
 
+    @classmethod
+    async def get_lesson_type_row(cls, session: scoped_session, lesson_type) -> int:
+        query = select(cls.row).where(cls.lesson_type==lesson_type).order_by(desc(cls.row)).limit(1)
+
+        try:
+            result = await session.execute(query)
+            await session.commit()                          # type: ignore
+            result = result.fetchone()
+            print(result)
+            if result is None:
+                return 2
+
+            return result[0]+1
+        except SQLAlchemyError as e:
+            logger.error(f"ROLLBACK EXCEPTION: {e, lesson_type}")
+            return 0
 
     @classmethod
     async def create(cls, session: scoped_session, **kwargs: Any):
-        query = insert(cls).values(**kwargs).returning(cls.id)
+        row = await cls.get_lesson_type_row(session, kwargs.get('lesson_type'))
+
+        query = insert(cls).values(**kwargs, row=row).returning(cls.id)
 
         try:
-            result = await session.execute(query)            
+            result = await session.execute(query)
             await session.commit()                          # type: ignore
             return result.fetchone()[0]
         except SQLAlchemyError as e:
@@ -208,13 +227,13 @@ class Payment(Base):
 
         date_range_ = date_now + timedelta(days=-date_range)
 
-        query = "SELECT pay.id::varchar, pay.order_id, pay.lesson_type, push.sheet " + \
-                "FROM payments AS pay " + \
-                "JOIN pushes AS push ON push.file = pay.lesson_type " + \
-                "WHERE status = 'В ожидании' " + \
-                    f"AND created_at BETWEEN '{date_range_.__str__() + (' 00:00:00')}'::timestamp " + \
-                    f"AND '{date_now.__str__() + (' 23:59:59')}'::timestamp " + \
-                "ORDER BY pay.lesson_type;"
+        query = f"""SELECT pay.order_id, pay.lesson_type, push.sheet, pay.row
+                FROM payments AS pay
+                JOIN pushes AS push ON push.file = pay.lesson_type
+                WHERE status = 'В ожидании'
+                    AND created_at BETWEEN '{date_range_.__str__() + (' 00:00:00')}'::timestamp
+                    AND '{date_now.__str__() + (' 23:59:59')}'::timestamp
+                ORDER BY pay.lesson_type;"""
 
         # print(date_range_, date_now.__str__() + (' 23:59:59'), query)
     
@@ -237,12 +256,14 @@ class Payment(Base):
         data_for_update = []
 
         for i in orders:
-            data_for_update.append({'status': i[-1], '_id': int(i[0])})
+            data_for_update.append({'_status': i[4], '_order_id': i[0], '_paid_at': i[-1]})
 
         if data_for_update == []:
             return
 
-        query = update(cls).where(cls.id==bindparam('_id')).values({'status': bindparam('status')})
+        query = update(cls).where(cls.order_id==bindparam('_order_id')).values(
+            {'status': bindparam('_status'), 'paid_at': bindparam('_paid_at')}
+        )
 
         try:
             await session.execute(query, data_for_update)

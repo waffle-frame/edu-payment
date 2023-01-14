@@ -24,5 +24,8 @@ async def check_rows_in_sheet(spread_client, shee, db_session, cells: int, file_
     sleep(3)        
 
     shee[new_sheet_number+1].title = f'{new_sheet_number*10000+1}—{(new_sheet_number+1)*10000}'
+    shee.create_protected_range("A1", "H1")
+    shee.create_protected_range("A", "A")
+    shee.create_protected_range("C", "J")
 
     return shee[new_sheet_number+1]

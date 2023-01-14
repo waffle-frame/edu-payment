@@ -49,13 +49,13 @@ class Push(Base):
 
         query_exec = await session.execute(query)
         await session.commit()                              # type: ignore
-        return query_exec.fetchone()[0]
+        return query_exec.fetchone()[0] 
 
     @classmethod
     async def get_data_for_upload(cls, session: scoped_session, offset: int, file_name: str):
         # TODO: EXPLAIN
         query_data = f"""
-            SELECT ('{issue_invoice_prefix}' || lesson_type || id), 
+            SELECT ('{issue_invoice_prefix}' || lesson_type || row-1), 
                     status,
                     ('=INT(' || amount || '/100)&","&MOD(' || amount || ';100)&" ₽"'), 
                     ('=HYPERLINK("' || order_link || '";"' || order_id ||  '")'),
