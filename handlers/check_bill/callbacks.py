@@ -7,7 +7,8 @@ from aiogram.dispatcher import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.payment import Payment
-from keyboards.keyboard import parents_history_cbkb
+from keyboards.keyboard import parents_history_cbkb, \
+    manager_history_operations_kb
 
 # 
 async def parents_history_days_cb(callback: CallbackQuery, state: FSMContext, db: AsyncSession):
@@ -19,7 +20,8 @@ async def parents_history_days_cb(callback: CallbackQuery, state: FSMContext, db
     sdata = await state.get_data()
     if sdata.get('parents_name') is None:
         await state.finish()
-        return await callback.message.edit_caption("Запрос устарел")
+        await callback.message.edit_caption("Запрос устарел")
+        return await callback.message.answer("Выберите операцию:", reply_markup=manager_history_operations_kb())
 
     data = await Payment.parents_history(db, sdata['parents_name'], int(match.group(1)))
     if data is None or data == []:

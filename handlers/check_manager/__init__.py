@@ -14,7 +14,7 @@ from keyboards.buttons import operations_list
 
 
 def register_check_manager_commands(dp: Dispatcher):
-    dp.register_message_handler(start_check_manager, Text(equals=[operations_list[2], '/check_manager']), state="*")
+    dp.register_message_handler(start_check_manager, Text(equals=[operations_list[2], '/check_by_filter']), state="*")
 
     dp.register_message_handler(manager_username_or_date, state=CheckManager.parameter)
     dp.register_message_handler(username, state=CheckManager.username)

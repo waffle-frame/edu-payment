@@ -7,7 +7,8 @@ from aiogram.dispatcher import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.payment import Payment
-from keyboards.keyboard import manager_history_cbkb, operations_kb
+from keyboards.keyboard import manager_history_cbkb, \
+    manager_history_operations_kb
 
 # 
 async def manager_history_cb(callback: CallbackQuery, state: FSMContext, db: AsyncSession):
@@ -16,9 +17,10 @@ async def manager_history_cb(callback: CallbackQuery, state: FSMContext, db: Asy
         return
 
     sdata = await state.get_data()
-    if sdata.get("start_date") is None or sdata.get("date_range_param") is None:
+    if sdata.get("start_date") is None:
         await state.finish()
-        return await callback.message.edit_text("Запрос устарел. Введите команду /start")
+        await callback.message.edit_text("Запрос устарел")
+        return await callback.message.answer("Выберите операцию:", reply_markup=manager_history_operations_kb())
 
     name: str = sdata.get("username", 'all')
     time_at = sdata.get("date_range_param", 'created_at')
@@ -69,7 +71,8 @@ async def manager_history_periods_cb(callback: CallbackQuery, state: FSMContext,
     sdata = await state.get_data()
     if sdata.get("username") is None:
         await state.finish()
-        return await callback.message.edit_text("Запрос устарел")
+        await callback.message.edit_text("Запрос устарел")
+        return await callback.message.answer("Выберите операцию:", reply_markup=manager_history_operations_kb())
 
     data = await Payment.manager_history(db, start_date, end_date.strftime("%d-%m-%Y"), name=sdata['username'])
     if data is None or data == []:
