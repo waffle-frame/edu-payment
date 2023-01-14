@@ -27,7 +27,7 @@ class Payment(Base):
     ]
 
     id = Column(BigInteger, primary_key = True)
-    created_at = Column(DateTime(timezone=True), default = datetime.now().replace(microsecond=0))
+    created_at = Column(DateTime(timezone=False), default = datetime.now().replace(microsecond=0))
 
     paid_at = Column(DateTime(timezone=True))
     status = Column(ChoiceType(PAYMENT_STATE, impl=String()), default="В ожидании")
@@ -129,7 +129,7 @@ class Payment(Base):
             return
 
     @classmethod
-    async def manager_history(cls, session: scoped_session, from_date: str, to_date: str | None=None, status: str='all', name: str='all'):
+    async def manager_history(cls, session: scoped_session, from_date: str, to_date: str | None=None, time_at_: str='created_at', status: str='all', name: str='all'):
         creator_username = cls.creator_username.isnot(None)
         if name != 'all':
             creator_username = cls.creator_username==name
@@ -138,15 +138,19 @@ class Payment(Base):
         if to_date is not None:
             end_date = datetime.strptime(to_date, '%d-%m-%Y') + timedelta(hours=23, minutes=59, seconds=59)
         else:
-            end_date = start_date + timedelta(hours=23, minutes=59, seconds=50)
+            end_date = start_date + timedelta(hours=23, minutes=59, seconds=59)
+
+        time_at = getattr(cls, time_at_).between(start_date, end_date)
 
         query = select(
             cls.id, cls.lesson_type, cls.amount, cls.description, cls.created_at, cls.status, cls.creator_username
         ).where(
-            creator_username, cls.created_at.between(start_date, end_date),
+            creator_username, time_at,
             cls.status.in_([i[0] for i in cls.PAYMENT_STATE] if status=='all' else ['Оплачено'])
         ).order_by(desc(cls.created_at))
 
+        # print(query.compile(compile_kwargs={"literal_binds": True}))
+        
         try:
             query_exec = await session.execute(query)
             result = query_exec.fetchall()
@@ -273,3 +277,8 @@ class Payment(Base):
             logger.error(f"ROLLBACK: {e, orders}")
             await session.rollback()                        # type: ignore
             return                                          # type: ignore
+
+
+# ALTER TABLE payments
+# ALTER COLUMN created_at SET TYPE timestamp
+# ALTER COLUMN column_name2 [SET DATA] TYPE new_data_type,

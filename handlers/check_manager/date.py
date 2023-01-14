@@ -1,18 +1,13 @@
 import re
-import pytz
 
-from datetime import datetime
 from aiogram.types import Message
 from aiogram.dispatcher import FSMContext
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.payment import Payment
 from keyboards.keyboard import manager_history_cbkb
-from states.check_manager import CheckManager
 
 
 #
-async def date(message: Message, state: FSMContext, db: AsyncSession):
+async def date(message: Message, state: FSMContext):
     regex = r"(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\d\d"
 
     match = re.search(rf"({regex})? ?{regex}", message.text)
@@ -25,9 +20,10 @@ async def date(message: Message, state: FSMContext, db: AsyncSession):
 
     async with state.proxy() as data:
         match = match.string.split(' ')
-        if len(match) == 2:
+        print(match)
+        if len(match) == 3:
             data["start_date"] = match[0].replace(".", "-")
-            data["end_date"] = match[1].replace(".", "-")
+            data["end_date"] = match[2].replace(".", "-")
         else:
             data["start_date"] = match[0].replace(".", "-")
             data["end_date"] = None

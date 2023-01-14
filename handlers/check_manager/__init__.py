@@ -4,6 +4,7 @@ from aiogram.dispatcher.filters.builtin import Text
 from handlers.check_manager.start_check_manager import start_check_manager
 from handlers.check_manager.manager_username_or_date import manager_username_or_date
 from handlers.check_manager.username import username, username_period
+from handlers.check_manager.date_range import date_range
 from handlers.check_manager.date import date
 
 from handlers.check_manager.callback import manager_history_cb, manager_history_periods_cb
@@ -18,6 +19,7 @@ def register_check_manager_commands(dp: Dispatcher):
     dp.register_message_handler(manager_username_or_date, state=CheckManager.parameter)
     dp.register_message_handler(username, state=CheckManager.username)
     dp.register_message_handler(username_period, state=CheckManager.username_date)
+    dp.register_message_handler(date_range, state=CheckManager.daterange)
     dp.register_message_handler(date, state=CheckManager.date)
 
     # Callbacks

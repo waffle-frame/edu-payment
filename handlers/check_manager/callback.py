@@ -16,16 +16,19 @@ async def manager_history_cb(callback: CallbackQuery, state: FSMContext, db: Asy
         return
 
     sdata = await state.get_data()
-    if sdata.get("start_date") is None:
+    if sdata.get("start_date") is None or sdata.get("date_range_param") is None:
         await state.finish()
         return await callback.message.edit_text("Запрос устарел. Введите команду /start")
 
     name: str = sdata.get("username", 'all')
+    time_at = sdata.get("date_range_param", 'created_at')
+
+    # print(sdata["start_date"], sdata["end_date"], time_at)
 
     if sdata.get('end_date') is None:
-        data = await Payment.manager_history(db, sdata['start_date'], status=match.group(1), name=name)
+        data = await Payment.manager_history(db, sdata['start_date'], time_at_=time_at, status=match.group(1), name=name)
     else:
-        data = await Payment.manager_history(db, sdata['start_date'], sdata['end_date'], match.group(1), name=name)
+        data = await Payment.manager_history(db, sdata['start_date'], sdata['end_date'], time_at, match.group(1), name=name)
 
     if data is None or data == []:
         try:
@@ -49,6 +52,7 @@ async def manager_history_cb(callback: CallbackQuery, state: FSMContext, db: Asy
         await callback.message.edit_text(message_text, reply_markup=manager_history_cbkb())
     except Exception:
         await callback.answer()
+
 
 async def manager_history_periods_cb(callback: CallbackQuery, state: FSMContext, db: AsyncSession):
     match = re.search(rf"\bmperiod_history_(\d+)days\b", callback.data)

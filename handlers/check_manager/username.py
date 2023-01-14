@@ -4,12 +4,13 @@ from aiogram.dispatcher import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.payment import Payment
-from states.check_manager import CheckManager
 from keyboards.keyboard import manager_history_periods_cbkb, manager_history_cbkb
 
 
 #
 async def username(message: Message, state: FSMContext, db: AsyncSession):
+    if message.text == 'Я':
+        message.text = message.from_user.username
     data = await Payment.check_name(db, message.text)
     if not data or data is None:
         return await message.answer("Менеджер не найден")

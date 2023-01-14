@@ -2,7 +2,8 @@ from aiogram.types import ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboa
 
 from utils.bot.list_to_buttons import list_to_buttons
 from keyboards.buttons import operations_list, issue_invoice_dict, \
-    validation_list, parent_history_operations_list, manager_history_operations_list
+    validation_list, parent_history_operations_list, manager_history_operations_list, \
+    manager_history_date_range_operations_dict
 
 
 def operations_kb() -> ReplyKeyboardMarkup:
@@ -20,6 +21,12 @@ def parents_history_operations_kb() -> ReplyKeyboardMarkup:
 def manager_history_operations_kb() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=list_to_buttons(manager_history_operations_list),
+        resize_keyboard=True, one_time_keyboard=True
+    )
+
+def manager_history_date_range_operations_kb() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=list_to_buttons(list(manager_history_date_range_operations_dict.keys())),
         resize_keyboard=True, one_time_keyboard=True
     )
 
