@@ -25,7 +25,7 @@ async def manager_history_cb(callback: CallbackQuery, state: FSMContext, db: Asy
     name: str = sdata.get("username", 'all')
     time_at = sdata.get("date_range_param", 'created_at')
 
-    # print(sdata["start_date"], sdata["end_date"], time_at)
+    print(sdata["start_date"], sdata["end_date"], time_at)
 
     if sdata.get('end_date') is None:
         data = await Payment.manager_history(db, sdata['start_date'], time_at_=time_at, status=match.group(1), name=name)

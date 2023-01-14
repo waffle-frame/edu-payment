@@ -30,6 +30,12 @@ def manager_history_date_range_operations_kb() -> ReplyKeyboardMarkup:
         resize_keyboard=True, one_time_keyboard=True
     )
 
+def filter_by_manager_kb() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=list_to_buttons(list("Я")),
+        resize_keyboard=True, one_time_keyboard=True
+    )
+
 def issue_invoice_kb() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=list_to_buttons(list(issue_invoice_dict.keys())),

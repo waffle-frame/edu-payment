@@ -1,11 +1,11 @@
 import re
 
-from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import Message
 
 from states.check_manager import CheckManager
 from keyboards.buttons import manager_history_operations_list
 from keyboards.keyboard import manager_history_date_range_operations_kb, \
-    manager_history_operations_kb
+    manager_history_operations_kb, filter_by_manager_kb
 
 #
 async def manager_username_or_date(message: Message):
@@ -13,7 +13,7 @@ async def manager_username_or_date(message: Message):
         await CheckManager.username.set()
         return await message.answer(
             "Укажите <b>username</b> менеджера",
-            reply_markup=ReplyKeyboardMarkup([[KeyboardButton("Я")]], resize_keyboard=True)
+            reply_markup=filter_by_manager_kb()
         )
 
     if message.text == manager_history_operations_list[1]:

@@ -19,11 +19,11 @@ async def date(message: Message, state: FSMContext):
         )
 
     async with state.proxy() as data:
-        match = match.string.split(' ')
+        match = match.string.split()
         print(match)
-        if len(match) == 3:
+        if len(match) == 2:
             data["start_date"] = match[0].replace(".", "-")
-            data["end_date"] = match[2].replace(".", "-")
+            data["end_date"] = match[1].replace(".", "-")
         else:
             data["start_date"] = match[0].replace(".", "-")
             data["end_date"] = None
