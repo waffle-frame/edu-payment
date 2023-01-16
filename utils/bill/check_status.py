@@ -52,9 +52,9 @@ async def check_bill(order_data: List) -> List:
                     # Set
                     if "orderStatus" in data:
                         order_data[index].append(error_code_to_string[data["orderStatus"]])
-                        logger.info(data)
                         if data["orderStatus"] == 2 or data["orderStatus"] == 5:
                             if "depositedDate" in data:
+                                logger.info(data)
                                 # UNIX to timestamp
                                 datetime_ = datetime.fromtimestamp(data["depositedDate"] // 1000)
                                 order_data[index].append(datetime_)

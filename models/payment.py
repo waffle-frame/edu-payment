@@ -192,10 +192,10 @@ class Payment(Base):
         try:
             result = await session.execute(query)
             await session.commit()                          # type: ignore
-            return result.fetchone()[0]
+            return row, result.fetchone()[0]
         except SQLAlchemyError as e:
             logger.error(f"ROLLBACK EXCEPTION: {e, kwargs}")
-            return
+            return None, None
 
     @classmethod
     async def update(cls, session: scoped_session, id: int, **kwargs: Any):

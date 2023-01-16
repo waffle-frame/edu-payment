@@ -33,13 +33,14 @@ async def generate_bill(description: str, pennies: int, order_number: str) -> Tu
             async with session.get(url, params=params) as bill_request:
                 response = await bill_request.read()
                 data = json.loads(response)
-                logger.info(data)
+                logger.info(params['orderNumber'], data)
 
                 if 'errorCode' == '32':
                     return "", ""
                 if 'errorMessage' in data:
                     if data['errorMessage'] == 'Заказ с таким номером уже обработан':
                         params['orderNumber'] = params['orderNumber'] + randint(0, 1000).__str__()
+                        continue
                 if "formUrl" in data:
                     await session.close()
                     return data['orderId'], data["formUrl"]

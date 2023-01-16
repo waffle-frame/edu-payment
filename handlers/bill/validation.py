@@ -22,7 +22,7 @@ async def validation(message: Message, state: FSMContext, db: AsyncSession):
     user = message['from']
     sdata = await state.get_data()
 
-    order_number: int | None = await Payment.create(db,
+    row, id = await Payment.create(db,
         creator_username=user.username,
         creator_telegram_id=user.id,
         parents_name=sdata.get("parents_data"),
@@ -31,7 +31,7 @@ async def validation(message: Message, state: FSMContext, db: AsyncSession):
         description=sdata.get("description"), 
         amount=int(sdata.get("cost", 0)),
     )
-    if order_number is None:
+    if id is None or row is None:
         logger.error(sdata)
         return await message.answer("⚠️ Упс, что-то пошло не так")
 
@@ -41,10 +41,12 @@ async def validation(message: Message, state: FSMContext, db: AsyncSession):
     if order_id == "" or order_link == "":
         return await message.answer("Сумма не должна превышать 42949672.95 рублей")
 
-    await Payment.update(db, order_number, order_id=order_id, order_link=order_link)
+    print(order_id, order_link)
+
+    await Payment.update(db, id, order_id=order_id, order_link=order_link)
 
     await message.answer(
-        f"Счет на оплату успешно создан!\nНомер заказа: <code>{order}{order_number}</code>\n" + \
+        f"Счет на оплату успешно создан!\nНомер заказа: <code>{order}{row-1}</code>\n" + \
         f"Ссылка на оплату: {order_link}\n\nСсылка активна в течении 2-уx недель", reply_markup=operations_kb()
     )
     await state.finish()
