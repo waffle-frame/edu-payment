@@ -231,7 +231,7 @@ class Payment(Base):
 
         date_range_ = date_now + timedelta(days=-date_range)
 
-        query = f"""SELECT pay.order_id, pay.lesson_type, push.sheet, pay.row
+        query = f"""SELECT pay.order_id, pay.lesson_type, push.sheet, pay.row, pay.creator_telegram_id
                 FROM payments AS pay
                 JOIN pushes AS push ON push.file = pay.lesson_type
                 WHERE status = 'В ожидании'
@@ -259,8 +259,10 @@ class Payment(Base):
 
         data_for_update = []
 
+        print(orders)
+
         for i in orders:
-            data_for_update.append({'_status': i[4], '_order_id': i[0], '_paid_at': i[-1]})
+            data_for_update.append({'_status': i[5], '_order_id': i[0], '_paid_at': i[-1]})
 
         if data_for_update == []:
             return
@@ -277,8 +279,3 @@ class Payment(Base):
             logger.error(f"ROLLBACK: {e, orders}")
             await session.rollback()                        # type: ignore
             return                                          # type: ignore
-
-
-# ALTER TABLE payments
-# ALTER COLUMN created_at SET TYPE timestamp
-# ALTER COLUMN column_name2 [SET DATA] TYPE new_data_type,

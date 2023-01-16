@@ -1,7 +1,6 @@
 # Packages
 from loguru import logger
 from aiogram import Dispatcher, executor
-from sqlalchemy.orm import scoped_session
 
 # Configs
 import handlers
