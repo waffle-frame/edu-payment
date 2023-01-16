@@ -61,11 +61,11 @@ class Payment(Base):
             return False
 
     @classmethod
-    async def check_invoice(cls, session: scoped_session, order_id: int, lesson_type: str) -> Tuple[str, datetime, str] | None:
+    async def check_invoice(cls, session: scoped_session, row: int, lesson_type: str) -> Tuple[str, datetime, str] | None:
         query = select(
             cls.status, cls.created_at, cls.creator_username
         ).where(
-            cls.id==order_id, cls.lesson_type==lesson_type
+            cls.row==row+1, cls.lesson_type==lesson_type
         )
 
         try:
@@ -76,13 +76,13 @@ class Payment(Base):
             return result
 
         except SQLAlchemyError as e:
-            logger.error(f"ROLLBACK EXCEPTION: {e, order_id}")
+            logger.error(f"ROLLBACK EXCEPTION: {e, row}")
             return
 
     @classmethod
     async def paid_invoice(cls, session: scoped_session, parents_name: str):
         query = select(
-            cls.id, cls.lesson_type, cls.amount, cls.created_at
+            cls.row-1, cls.lesson_type, cls.amount, cls.created_at
         ).where(
             cls.status=='Оплачено', cls.parents_name==parents_name
         ).order_by(desc(cls.created_at))
@@ -108,7 +108,7 @@ class Payment(Base):
         end_date = datetime.now()
 
         query = select(
-            cls.id, cls.lesson_type, cls.amount, cls.description, cls.created_at, cls.creator_username, cls.status
+            cls.row-1, cls.lesson_type, cls.amount, cls.description, cls.created_at, cls.creator_username, cls.status
         ).where(
             cls.parents_name==parents_name, between(cls.created_at, start_date, end_date) 
         ).order_by(desc(cls.created_at))
@@ -143,7 +143,7 @@ class Payment(Base):
         time_at = getattr(cls, time_at_).between(start_date, end_date)
 
         query = select(
-            cls.id, cls.lesson_type, cls.amount, cls.description, cls.created_at, cls.status, cls.creator_username
+            cls.row-1, cls.lesson_type, cls.amount, cls.description, cls.created_at, cls.status, cls.creator_username
         ).where(
             creator_username, time_at,
             cls.status.in_([i[0] for i in cls.PAYMENT_STATE] if status=='all' else ['Оплачено'])
