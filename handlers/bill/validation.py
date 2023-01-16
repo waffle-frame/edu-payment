@@ -7,16 +7,22 @@ from models.payment import Payment
 from states.issue_invoice import IssueInvoice
 from utils.bill.generate_bill import generate_bill
 from handlers.bill.start_issue_invoice_operation import start_issue_invoice_operation
-from keyboards.buttons import validation_list, issue_invoice_prefix, issue_invoice_dict
-from keyboards.keyboard import operations_kb
+from keyboards.buttons import validation_list, issue_invoice_prefix, issue_invoice_dict, \
+    go_back
+from keyboards.keyboard import operations_kb, go_back_kb
 
 #
 async def validation(message: Message, state: FSMContext, db: AsyncSession):
+    if message.text == go_back:
+        await IssueInvoice.cost.set()
+        return await message.answer("Введите сумму в копейках:", reply_markup=go_back_kb())
+
     if message.text not in validation_list:
         return await message.answer("Вариант не существует")
 
     if message.text == validation_list[1]:
         await IssueInvoice.lesson_type.set()
+        message.text = "/invoice"
         return await start_issue_invoice_operation(message)
 
     user = message['from']

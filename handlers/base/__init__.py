@@ -7,7 +7,7 @@ import handlers.base.cancel as _
 from handlers.base.help import help
 from handlers.base.id import get_id
 from handlers.base.start import start
-from handlers.base.go_to_menu import go_to_menu
+from handlers.base.go_to import go_to_menu
 
 
 def register_base_commands(dp: Dispatcher):

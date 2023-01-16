@@ -10,8 +10,6 @@ async def check_bill_last_3_days_job(db_session,  spread_client: Client):
 
     orders = await check_bill(order_ids)
 
-    print(orders)
-
     await Payment.update_status(db_session, orders)
 
     await update_states(spread_client, orders)

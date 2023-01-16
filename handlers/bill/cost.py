@@ -2,14 +2,20 @@
 from aiogram.types import Message
 from aiogram.dispatcher import FSMContext
 
-from keyboards.keyboard import validation_kb
 from states.issue_invoice import IssueInvoice
+from keyboards.buttons import go_back
+from keyboards.keyboard import go_back_kb, validation_kb
 
 
 # 
 async def cost(message: Message, state: FSMContext):
+    if message.text == go_back:
+        await IssueInvoice.parents_data.set()
+        return await message.answer("Введите описание:", reply_markup=go_back_kb())
+
     if not message.text.isdigit():
         return await message.answer("Не верный тип данных. Введите стоимость в цифрах\n\nНапример: 300000")
+
     if int(message.text) > 4294967295:
         return await message.answer("Сумма не может превышать больше 4294967295 рублей")
 

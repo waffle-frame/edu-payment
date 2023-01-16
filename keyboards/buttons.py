@@ -5,6 +5,7 @@ issue_invoice_dict = {
     "Спецкурс": "special"
 }
 
+go_back = "⬅️ Вернуться к предыдущему шагу"
 issue_invoice_prefix = 'tg2_'
 validation_list = ['✅', '❌']
 manager_history_operations_list = ['По менеджеру', 'По дате, диапазону']

@@ -3,7 +3,7 @@ from aiogram.types import ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboa
 from utils.bot.list_to_buttons import list_to_buttons
 from keyboards.buttons import operations_list, issue_invoice_dict, \
     validation_list, parent_history_operations_list, manager_history_operations_list, \
-    manager_history_date_range_operations_dict
+    manager_history_date_range_operations_dict, go_back
 
 
 def operations_kb() -> ReplyKeyboardMarkup:
@@ -45,9 +45,17 @@ def issue_invoice_kb() -> ReplyKeyboardMarkup:
 def reset_kb() -> ReplyKeyboardRemove:
     return ReplyKeyboardRemove()
 
-def validation_kb() -> ReplyKeyboardMarkup:
+def go_back_kb() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
-        keyboard=list_to_buttons(validation_list),
+        keyboard=list_to_buttons([go_back]),
+        resize_keyboard=True, one_time_keyboard=True
+    )
+
+def validation_kb() -> ReplyKeyboardMarkup:
+    data = validation_list.copy()
+    data.append(go_back)
+    return ReplyKeyboardMarkup(
+        keyboard=list_to_buttons(data),
         one_time_keyboard=True
     )
 
